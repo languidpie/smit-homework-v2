@@ -12,6 +12,7 @@ import com.inventory.exception.ErrorResponse;
 import com.inventory.record.dto.RecordCreateRequest;
 import com.inventory.record.dto.RecordResponse;
 import com.inventory.record.dto.RecordUpdateRequest;
+import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -25,6 +26,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -63,7 +66,7 @@ class RecordIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -87,7 +90,7 @@ class RecordIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -111,7 +114,7 @@ class RecordIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -135,7 +138,7 @@ class RecordIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -159,7 +162,7 @@ class RecordIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -179,7 +182,7 @@ class RecordIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.PUT("/api/records/" + recordId, updateRequest), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.PUT("/api/records/" + recordId, updateRequest).basicAuth("katrin", "katrin123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -199,7 +202,7 @@ class RecordIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.PUT("/api/records/" + recordId, updateRequest), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.PUT("/api/records/" + recordId, updateRequest).basicAuth("katrin", "katrin123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -227,7 +230,7 @@ class RecordIntegrationTest {
 
             // when - create
             HttpResponse<RecordResponse> createResponse = client.toBlocking()
-                    .exchange(HttpRequest.POST("/api/records", createRequest), RecordResponse.class);
+                    .exchange(HttpRequest.POST("/api/records", createRequest).basicAuth("katrin", "katrin123"), RecordResponse.class);
 
             // then - create
             assertThat(createResponse.status().getCode()).isEqualTo(HttpStatus.CREATED.getCode());
@@ -236,7 +239,7 @@ class RecordIntegrationTest {
 
             // when - read
             RecordResponse readResponse = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/records/" + recordId), RecordResponse.class);
+                    .retrieve(HttpRequest.GET("/api/records/" + recordId).basicAuth("katrin", "katrin123"), RecordResponse.class);
 
             // then - read
             assertThat(readResponse.title()).isEqualTo("Abbey Road");
@@ -256,7 +259,7 @@ class RecordIntegrationTest {
 
             // when - update
             RecordResponse updateResponse = client.toBlocking()
-                    .retrieve(HttpRequest.PUT("/api/records/" + recordId, updateRequest), RecordResponse.class);
+                    .retrieve(HttpRequest.PUT("/api/records/" + recordId, updateRequest).basicAuth("katrin", "katrin123"), RecordResponse.class);
 
             // then - update
             assertThat(updateResponse.title()).isEqualTo("Abbey Road (Remastered)");
@@ -266,14 +269,14 @@ class RecordIntegrationTest {
 
             // when - delete
             HttpResponse<?> deleteResponse = client.toBlocking()
-                    .exchange(HttpRequest.DELETE("/api/records/" + recordId));
+                    .exchange(HttpRequest.DELETE("/api/records/" + recordId).basicAuth("katrin", "katrin123"));
 
             // then - delete
             assertThat(deleteResponse.status().getCode()).isEqualTo(HttpStatus.NO_CONTENT.getCode());
 
             // when - verify deleted
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + recordId), RecordResponse.class));
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + recordId).basicAuth("katrin", "katrin123"), RecordResponse.class));
 
             // then - verify deleted
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -291,7 +294,7 @@ class RecordIntegrationTest {
 
             // when - filter by genre (rock)
             RecordResponse[] rockRecords = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/records/genre/ROCK"), RecordResponse[].class);
+                    .retrieve(HttpRequest.GET("/api/records/genre/ROCK").basicAuth("katrin", "katrin123"), RecordResponse[].class);
 
             // then - filter by genre (rock)
             assertThat(rockRecords).hasSize(2);
@@ -299,7 +302,7 @@ class RecordIntegrationTest {
 
             // when - filter by genre (jazz)
             RecordResponse[] jazzRecords = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/records/genre/JAZZ"), RecordResponse[].class);
+                    .retrieve(HttpRequest.GET("/api/records/genre/JAZZ").basicAuth("katrin", "katrin123"), RecordResponse[].class);
 
             // then - filter by genre (jazz)
             assertThat(jazzRecords).hasSize(2);
@@ -307,24 +310,26 @@ class RecordIntegrationTest {
 
             // when - search by artist
             RecordResponse[] beatlesResults = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/records/search?q=beatles"), RecordResponse[].class);
+                    .retrieve(HttpRequest.GET("/api/records/search?q=beatles").basicAuth("katrin", "katrin123"), RecordResponse[].class);
 
             // then - search by artist
             assertThat(beatlesResults).hasSize(2);
 
             // when - search by title
             RecordResponse[] blueResults = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/records/search?q=blue"), RecordResponse[].class);
+                    .retrieve(HttpRequest.GET("/api/records/search?q=blue").basicAuth("katrin", "katrin123"), RecordResponse[].class);
 
             // then - search by title
             assertThat(blueResults).hasSize(2);
 
-            // when - get all
-            RecordResponse[] allRecords = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/records"), RecordResponse[].class);
+            // when - get all (paginated)
+            Map<String, Object> pageResponse = client.toBlocking()
+                    .retrieve(HttpRequest.GET("/api/records").basicAuth("katrin", "katrin123"), Argument.of(Map.class, String.class, Object.class));
 
             // then - get all
-            assertThat(allRecords).hasSize(4);
+            List<?> content = (List<?>) pageResponse.get("content");
+            assertThat(content).hasSize(4);
+            assertThat(pageResponse.get("totalElements")).isEqualTo(4);
         }
 
         @Test
@@ -337,7 +342,7 @@ class RecordIntegrationTest {
 
             // when
             RecordResponse[] beatlesRecords = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/records/search?q=beatles"), RecordResponse[].class);
+                    .retrieve(HttpRequest.GET("/api/records/search?q=beatles").basicAuth("katrin", "katrin123"), RecordResponse[].class);
 
             // then
             assertThat(beatlesRecords).hasSize(4);
@@ -358,7 +363,7 @@ class RecordIntegrationTest {
         );
 
         RecordResponse response = client.toBlocking()
-                .retrieve(HttpRequest.POST("/api/records", request), RecordResponse.class);
+                .retrieve(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
         return response.id();
     }
 
@@ -374,6 +379,6 @@ class RecordIntegrationTest {
                 null
         );
 
-        client.toBlocking().exchange(HttpRequest.POST("/api/records", request), RecordResponse.class);
+        client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
     }
 }

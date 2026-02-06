@@ -12,6 +12,7 @@ import com.inventory.exception.ErrorResponse;
 import com.inventory.part.dto.PartCreateRequest;
 import com.inventory.part.dto.PartResponse;
 import com.inventory.part.dto.PartUpdateRequest;
+import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -23,6 +24,9 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -60,7 +64,7 @@ class PartIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -83,7 +87,7 @@ class PartIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -106,7 +110,7 @@ class PartIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -129,7 +133,7 @@ class PartIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -149,7 +153,7 @@ class PartIntegrationTest {
 
             // when
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().exchange(HttpRequest.PUT("/api/parts/" + partId, updateRequest), ErrorResponse.class));
+                    client.toBlocking().exchange(HttpRequest.PUT("/api/parts/" + partId, updateRequest).basicAuth("mart", "mart123"), ErrorResponse.class));
 
             // then
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -176,7 +180,7 @@ class PartIntegrationTest {
 
             // when - create
             HttpResponse<PartResponse> createResponse = client.toBlocking()
-                    .exchange(HttpRequest.POST("/api/parts", createRequest), PartResponse.class);
+                    .exchange(HttpRequest.POST("/api/parts", createRequest).basicAuth("mart", "mart123"), PartResponse.class);
 
             // then - create
             assertThat(createResponse.status().getCode()).isEqualTo(HttpStatus.CREATED.getCode());
@@ -185,7 +189,7 @@ class PartIntegrationTest {
 
             // when - read
             PartResponse readResponse = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/parts/" + partId), PartResponse.class);
+                    .retrieve(HttpRequest.GET("/api/parts/" + partId).basicAuth("mart", "mart123"), PartResponse.class);
 
             // then - read
             assertThat(readResponse.name()).isEqualTo("Shimano Brake");
@@ -204,7 +208,7 @@ class PartIntegrationTest {
 
             // when - update
             PartResponse updateResponse = client.toBlocking()
-                    .retrieve(HttpRequest.PUT("/api/parts/" + partId, updateRequest), PartResponse.class);
+                    .retrieve(HttpRequest.PUT("/api/parts/" + partId, updateRequest).basicAuth("mart", "mart123"), PartResponse.class);
 
             // then - update
             assertThat(updateResponse.name()).isEqualTo("Shimano XT Brake");
@@ -213,14 +217,14 @@ class PartIntegrationTest {
 
             // when - delete
             HttpResponse<?> deleteResponse = client.toBlocking()
-                    .exchange(HttpRequest.DELETE("/api/parts/" + partId));
+                    .exchange(HttpRequest.DELETE("/api/parts/" + partId).basicAuth("mart", "mart123"));
 
             // then - delete
             assertThat(deleteResponse.status().getCode()).isEqualTo(HttpStatus.NO_CONTENT.getCode());
 
             // when - verify deleted
             Throwable throwable = catchThrowable(() ->
-                    client.toBlocking().retrieve(HttpRequest.GET("/api/parts/" + partId), PartResponse.class));
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/parts/" + partId).basicAuth("mart", "mart123"), PartResponse.class));
 
             // then - verify deleted
             assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -238,7 +242,7 @@ class PartIntegrationTest {
 
             // when - filter by type
             PartResponse[] brakes = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/parts/type/BRAKE"), PartResponse[].class);
+                    .retrieve(HttpRequest.GET("/api/parts/type/BRAKE").basicAuth("mart", "mart123"), PartResponse[].class);
 
             // then - filter by type
             assertThat(brakes).hasSize(2);
@@ -246,18 +250,20 @@ class PartIntegrationTest {
 
             // when - search by name
             PartResponse[] shimanoResults = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/parts/search?q=shimano"), PartResponse[].class);
+                    .retrieve(HttpRequest.GET("/api/parts/search?q=shimano").basicAuth("mart", "mart123"), PartResponse[].class);
 
             // then - search by name
             assertThat(shimanoResults).hasSize(1);
             assertThat(shimanoResults[0].name()).contains("Shimano");
 
-            // when - get all
-            PartResponse[] allParts = client.toBlocking()
-                    .retrieve(HttpRequest.GET("/api/parts"), PartResponse[].class);
+            // when - get all (paginated)
+            Map<String, Object> pageResponse = client.toBlocking()
+                    .retrieve(HttpRequest.GET("/api/parts").basicAuth("mart", "mart123"), Argument.of(Map.class, String.class, Object.class));
 
             // then - get all
-            assertThat(allParts).hasSize(4);
+            List<?> content = (List<?>) pageResponse.get("content");
+            assertThat(content).hasSize(4);
+            assertThat(pageResponse.get("totalElements")).isEqualTo(4);
         }
     }
 
@@ -273,7 +279,7 @@ class PartIntegrationTest {
         );
 
         PartResponse response = client.toBlocking()
-                .retrieve(HttpRequest.POST("/api/parts", request), PartResponse.class);
+                .retrieve(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), PartResponse.class);
         return response.id();
     }
 
@@ -288,6 +294,6 @@ class PartIntegrationTest {
                 null
         );
 
-        client.toBlocking().exchange(HttpRequest.POST("/api/parts", request), PartResponse.class);
+        client.toBlocking().exchange(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), PartResponse.class);
     }
 }
