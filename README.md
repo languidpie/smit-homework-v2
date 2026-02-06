@@ -100,7 +100,7 @@ The raw OpenAPI spec (YAML) is available at:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/records` | List all records |
+| GET | `/api/records?sort=&direction=` | List all records (sortable) |
 | GET | `/api/records/{id}` | Get a record |
 | POST | `/api/records` | Create a record |
 | PUT | `/api/records/{id}` | Update a record |
@@ -112,7 +112,7 @@ The raw OpenAPI spec (YAML) is available at:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/parts` | List all parts |
+| GET | `/api/parts?sort=&direction=` | List all parts (sortable) |
 | GET | `/api/parts/{id}` | Get a part |
 | POST | `/api/parts` | Create a part |
 | PUT | `/api/parts/{id}` | Update a part |
