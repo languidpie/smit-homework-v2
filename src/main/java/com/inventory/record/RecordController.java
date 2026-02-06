@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.micronaut.security.annotation.Secured;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -32,6 +33,7 @@ import java.util.List;
 @Controller("/api/records")
 @ExecuteOn(TaskExecutors.BLOCKING)
 @Validated
+@Secured({"ROLE_RECORDS"})
 @Tag(name = "Vinyl Records", description = "Manage Katrin's vinyl record collection")
 public class RecordController {
 

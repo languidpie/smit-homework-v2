@@ -58,7 +58,7 @@ class RecordControllerTest {
 
         // when
         HttpResponse<RecordResponse> response = client.toBlocking()
-                .exchange(HttpRequest.POST("/api/records", request), RecordResponse.class);
+                .exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
 
         // then
         assertThat(response.status().getCode()).isEqualTo(HttpStatus.CREATED.getCode());
@@ -75,7 +75,7 @@ class RecordControllerTest {
 
         // when
         RecordResponse response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/records/" + recordId), RecordResponse.class);
+                .retrieve(HttpRequest.GET("/api/records/" + recordId).basicAuth("katrin", "katrin123"), RecordResponse.class);
 
         // then
         assertThat(response.id()).isEqualTo(recordId);
@@ -89,7 +89,7 @@ class RecordControllerTest {
 
         // when
         Throwable throwable = catchThrowable(() ->
-                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + nonExistentId), RecordResponse.class));
+                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + nonExistentId).basicAuth("katrin", "katrin123"), RecordResponse.class));
 
         // then
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -108,7 +108,7 @@ class RecordControllerTest {
 
         // when
         RecordResponse response = client.toBlocking()
-                .retrieve(HttpRequest.PUT("/api/records/" + recordId, updateRequest), RecordResponse.class);
+                .retrieve(HttpRequest.PUT("/api/records/" + recordId, updateRequest).basicAuth("katrin", "katrin123"), RecordResponse.class);
 
         // then
         assertThat(response.title()).isEqualTo("Updated Title");
@@ -121,12 +121,12 @@ class RecordControllerTest {
 
         // when
         HttpResponse<?> response = client.toBlocking()
-                .exchange(HttpRequest.DELETE("/api/records/" + recordId));
+                .exchange(HttpRequest.DELETE("/api/records/" + recordId).basicAuth("katrin", "katrin123"));
 
         // then
         assertThat(response.status().getCode()).isEqualTo(HttpStatus.NO_CONTENT.getCode());
         Throwable throwable = catchThrowable(() ->
-                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + recordId), RecordResponse.class));
+                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + recordId).basicAuth("katrin", "katrin123"), RecordResponse.class));
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
     }
 
@@ -139,7 +139,7 @@ class RecordControllerTest {
 
         // when
         RecordResponse[] response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/records/genre/ROCK"), RecordResponse[].class);
+                .retrieve(HttpRequest.GET("/api/records/genre/ROCK").basicAuth("katrin", "katrin123"), RecordResponse[].class);
 
         // then
         assertThat(response).hasSize(2);
@@ -155,7 +155,7 @@ class RecordControllerTest {
 
         // when
         RecordResponse[] response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/records/search?q=beatles"), RecordResponse[].class);
+                .retrieve(HttpRequest.GET("/api/records/search?q=beatles").basicAuth("katrin", "katrin123"), RecordResponse[].class);
 
         // then
         assertThat(response).hasSize(2);
@@ -174,7 +174,7 @@ class RecordControllerTest {
         );
 
         RecordResponse response = client.toBlocking()
-                .retrieve(HttpRequest.POST("/api/records", request), RecordResponse.class);
+                .retrieve(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
         return response.id();
     }
 
@@ -190,7 +190,7 @@ class RecordControllerTest {
                 null
         );
 
-        client.toBlocking().exchange(HttpRequest.POST("/api/records", request), RecordResponse.class);
+        client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
     }
 
     private void createTestRecordWithArtist(String title, String artist) {
@@ -205,6 +205,6 @@ class RecordControllerTest {
                 null
         );
 
-        client.toBlocking().exchange(HttpRequest.POST("/api/records", request), RecordResponse.class);
+        client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
     }
 }

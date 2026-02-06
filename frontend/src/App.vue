@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
+
+function handleLogout() {
+  authStore.logout()
+  window.location.href = '/login'
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <nav class="bg-white shadow-sm">
+    <nav v-if="authStore.isAuthenticated" class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex">
@@ -15,6 +23,7 @@ import { RouterLink, RouterView } from 'vue-router'
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
               <RouterLink
+                v-if="authStore.canAccessParts"
                 to="/parts"
                 class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 :class="$route.path.startsWith('/parts')
@@ -24,6 +33,7 @@ import { RouterLink, RouterView } from 'vue-router'
                 Bicycle Parts
               </RouterLink>
               <RouterLink
+                v-if="authStore.canAccessRecords"
                 to="/records"
                 class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 :class="$route.path.startsWith('/records')
@@ -34,11 +44,22 @@ import { RouterLink, RouterView } from 'vue-router'
               </RouterLink>
             </div>
           </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-600">
+              {{ authStore.user?.username }}
+            </span>
+            <button
+              @click="handleLogout"
+              class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <main :class="authStore.isAuthenticated ? 'max-w-7xl mx-auto py-6 sm:px-6 lg:px-8' : ''">
       <RouterView />
     </main>
   </div>

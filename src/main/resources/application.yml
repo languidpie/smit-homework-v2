@@ -21,6 +21,30 @@ micronaut:
           allowed-headers:
             - Content-Type
             - Authorization
+          exposed-headers:
+            - Authorization
+  security:
+    authentication: bearer
+    intercept-url-map:
+      - pattern: /health
+        http-method: GET
+        access:
+          - isAnonymous()
+      - pattern: /swagger/**
+        access:
+          - isAnonymous()
+      - pattern: /webjars/**
+        access:
+          - isAnonymous()
+      - pattern: /api/auth/**
+        access:
+          - isAuthenticated()
+      - pattern: /api/parts/**
+        access:
+          - ROLE_PARTS
+      - pattern: /api/records/**
+        access:
+          - ROLE_RECORDS
   router:
     static-resources:
       swagger:

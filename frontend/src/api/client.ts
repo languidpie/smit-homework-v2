@@ -1,5 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 
+let authHeaderProvider: (() => string | null) | null = null
+
+export function setAuthHeaderProvider(provider: () => string | null): void {
+  authHeaderProvider = provider
+}
+
 export interface ApiError {
   status: number
   error: string
@@ -25,6 +31,12 @@ export class ApiException extends Error {
   }
 
   get userMessage(): string {
+    if (this.status === 401) {
+      return 'Authentication required. Please log in.'
+    }
+    if (this.status === 403) {
+      return 'Access denied. You do not have permission to access this resource.'
+    }
     if (this.status === 404) {
       return 'The requested item was not found. It may have been deleted.'
     }
@@ -41,8 +53,25 @@ export class ApiException extends Error {
   }
 }
 
+function getHeaders(): HeadersInit {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json'
+  }
+
+  const authHeader = authHeaderProvider?.()
+  if (authHeader) {
+    headers['Authorization'] = authHeader
+  }
+
+  return headers
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+    }
+
     let apiError: ApiError
 
     try {
@@ -82,16 +111,16 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export async function apiGet<T>(endpoint: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${endpoint}`)
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    headers: getHeaders()
+  })
   return handleResponse<T>(response)
 }
 
 export async function apiPost<T, R>(endpoint: string, data: T): Promise<R> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getHeaders(),
     body: JSON.stringify(data)
   })
   return handleResponse<R>(response)
@@ -100,9 +129,7 @@ export async function apiPost<T, R>(endpoint: string, data: T): Promise<R> {
 export async function apiPut<T, R>(endpoint: string, data: T): Promise<R> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getHeaders(),
     body: JSON.stringify(data)
   })
   return handleResponse<R>(response)
@@ -110,7 +137,8 @@ export async function apiPut<T, R>(endpoint: string, data: T): Promise<R> {
 
 export async function apiDelete(endpoint: string): Promise<void> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: getHeaders()
   })
   return handleResponse<void>(response)
 }
