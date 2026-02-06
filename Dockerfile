@@ -8,6 +8,7 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
+COPY gradle.properties .
 
 # Make gradlew executable
 RUN chmod +x gradlew
@@ -18,8 +19,8 @@ RUN ./gradlew dependencies --no-daemon
 # Copy source code
 COPY src src
 
-# Build the application
-RUN ./gradlew build -x test --no-daemon
+# Build the fat JAR
+RUN ./gradlew shadowJar --no-daemon
 
 # Stage 2: Run
 FROM eclipse-temurin:21-jre
