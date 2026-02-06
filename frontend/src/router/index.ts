@@ -72,18 +72,26 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
   document.title = `${to.meta.title || 'Page'} | Inventory System`
 
   const authStore = useAuthStore()
 
+  // Wait for session to be checked if not yet done
+  if (!authStore.sessionChecked) {
+    await authStore.restoreSession()
+  }
+
+  const isLoggedIn = !!authStore.user
+  const userRole = authStore.user?.role
+
   // Allow access to login page for unauthenticated users
   if (to.meta.requiresAuth === false) {
-    if (authStore.isAuthenticated && to.name === 'login') {
+    if (isLoggedIn && to.name === 'login') {
       // Redirect authenticated users away from login
-      if (authStore.canAccessParts) {
+      if (userRole === 'ROLE_PARTS') {
         next({ name: 'parts' })
-      } else if (authStore.canAccessRecords) {
+      } else if (userRole === 'ROLE_RECORDS') {
         next({ name: 'records' })
       } else {
         next({ name: 'home' })
@@ -95,16 +103,26 @@ router.beforeEach((to, _from, next) => {
   }
 
   // Check authentication for protected routes
-  if (!authStore.isAuthenticated) {
+  if (!isLoggedIn) {
     next({ name: 'login' })
+    return
+  }
+
+  // Redirect home to user's inventory
+  if (to.name === 'home') {
+    if (userRole === 'ROLE_PARTS') {
+      next({ name: 'parts' })
+    } else if (userRole === 'ROLE_RECORDS') {
+      next({ name: 'records' })
+    } else {
+      next()
+    }
     return
   }
 
   // Check role-based access
   if (to.meta.requiredRole) {
-    const hasAccess =
-      (to.meta.requiredRole === 'ROLE_PARTS' && authStore.canAccessParts) ||
-      (to.meta.requiredRole === 'ROLE_RECORDS' && authStore.canAccessRecords)
+    const hasAccess = to.meta.requiredRole === userRole
 
     if (!hasAccess) {
       next({ name: 'unauthorized' })

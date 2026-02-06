@@ -7,6 +7,7 @@ const AUTH_STORAGE_KEY = 'auth_credentials'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const credentials = ref<string | null>(null)
+  const sessionChecked = ref(false)
 
   const isAuthenticated = computed(() => !!user.value)
   const canAccessParts = computed(() => user.value?.role === 'ROLE_PARTS')
@@ -49,6 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function restoreSession(): Promise<boolean> {
     const storedToken = localStorage.getItem(AUTH_STORAGE_KEY)
     if (!storedToken) {
+      sessionChecked.value = true
       return false
     }
 
@@ -61,21 +63,25 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (!response.ok) {
         localStorage.removeItem(AUTH_STORAGE_KEY)
+        sessionChecked.value = true
         return false
       }
 
       const userInfo: User = await response.json()
       user.value = userInfo
       credentials.value = storedToken
+      sessionChecked.value = true
       return true
     } catch {
       localStorage.removeItem(AUTH_STORAGE_KEY)
+      sessionChecked.value = true
       return false
     }
   }
 
   return {
     user,
+    sessionChecked,
     isAuthenticated,
     canAccessParts,
     canAccessRecords,
