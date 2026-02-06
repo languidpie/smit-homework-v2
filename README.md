@@ -4,6 +4,33 @@ A web application for managing two inventory collections with role-based access 
 - **Bicycle Parts** - Mart's bike parts inventory
 - **Vinyl Records** - Katrin's record collection
 
+## Tech Stack
+
+### Backend
+- **Framework:** Micronaut 4
+- **Language:** Java 21
+- **Database:** PostgreSQL 16
+- **ORM:** Micronaut Data JDBC
+- **Migrations:** Flyway
+- **Security:** Micronaut Security (Basic Auth)
+- **API Docs:** OpenAPI / Swagger UI
+- **Build Tool:** Gradle
+
+### Frontend
+- **Framework:** Vue.js 3 (Composition API)
+- **Language:** TypeScript
+- **State Management:** Pinia
+- **Routing:** Vue Router
+- **Styling:** Tailwind CSS
+- **Build Tool:** Vite
+
+### Testing
+- **Backend:** JUnit 5, Testcontainers, AssertJ
+- **Frontend:** Vitest, Vue Test Utils
+
+### Infrastructure
+- **Containerization:** Docker, Docker Compose
+
 ## Prerequisites
 
 - Java 21
