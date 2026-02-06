@@ -3,6 +3,7 @@ package com.inventory.part;
 import com.inventory.common.PageResponse;
 import com.inventory.exception.ErrorResponse;
 import com.inventory.exception.NotFoundException;
+import com.inventory.exception.ValidationException;
 import com.inventory.part.dto.PartCreateRequest;
 import com.inventory.part.dto.PartResponse;
 import com.inventory.part.dto.PartUpdateRequest;
@@ -75,14 +76,14 @@ public class PartController {
     @Get
     @Operation(summary = "Get all parts", description = "Retrieve all bicycle parts in the inventory with pagination")
     @ApiResponse(responseCode = "200", description = "Paginated list of parts")
-    @ApiResponse(responseCode = "400", description = "Invalid sort field")
-    public HttpResponse<?> findAll(
+    @ApiResponse(responseCode = "400", description = "Invalid sort field", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    public PageResponse<PartResponse> findAll(
             @Parameter(description = "Page number (0-based)") @QueryValue(defaultValue = "0") int page,
             @Parameter(description = "Page size") @QueryValue(defaultValue = "20") int size,
             @Parameter(description = "Sort field") @Nullable @QueryValue String sort,
             @Parameter(description = "Sort direction (ASC or DESC)") @Nullable @QueryValue String direction) {
         if (sort != null && !SORTABLE_FIELDS.contains(sort)) {
-            return HttpResponse.badRequest("Invalid sort field: " + sort);
+            throw new ValidationException("sort", "Invalid sort field: " + sort);
         }
         Pageable pageable;
         if (sort != null) {
@@ -93,7 +94,7 @@ public class PartController {
         } else {
             pageable = Pageable.from(page, size);
         }
-        return HttpResponse.ok(PageResponse.from(partService.findAll(pageable), PartResponse::fromEntity));
+        return PageResponse.from(partService.findAll(pageable), PartResponse::fromEntity);
     }
 
     @Get("/type/{type}")
