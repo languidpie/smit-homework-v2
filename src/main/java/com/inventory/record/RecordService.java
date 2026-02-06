@@ -1,16 +1,13 @@
 package com.inventory.record;
 
 import com.inventory.exception.NotFoundException;
-import com.inventory.exception.ValidationException;
 import com.inventory.record.dto.RecordCreateRequest;
 import com.inventory.record.dto.RecordUpdateRequest;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -23,9 +20,6 @@ import java.util.Optional;
 @Singleton
 public class RecordService {
 
-    private static final int MIN_YEAR = 1900;
-    private static final int MAX_YEAR = 2100;
-
     private final RecordRepository recordRepository;
 
     public RecordService(RecordRepository recordRepository) {
@@ -34,9 +28,6 @@ public class RecordService {
 
     @Transactional
     public VinylRecord create(RecordCreateRequest request) {
-        // Service-level validation
-        validateCreateRequest(request);
-
         VinylRecord record = new VinylRecord();
         record.setTitle(request.title().trim());
         record.setArtist(request.artist().trim());
@@ -52,32 +43,6 @@ public class RecordService {
         record.setUpdatedAt(LocalDateTime.now());
 
         return recordRepository.save(record);
-    }
-
-    private void validateCreateRequest(RecordCreateRequest request) {
-        Map<String, String> errors = new HashMap<>();
-
-        if (request.title() == null || request.title().trim().isEmpty()) {
-            errors.put("title", "Title is required and cannot be blank");
-        }
-        if (request.artist() == null || request.artist().trim().isEmpty()) {
-            errors.put("artist", "Artist is required and cannot be blank");
-        }
-        if (request.releaseYear() == null) {
-            errors.put("releaseYear", "Release year is required");
-        } else if (request.releaseYear() < MIN_YEAR || request.releaseYear() > MAX_YEAR) {
-            errors.put("releaseYear", "Release year must be between " + MIN_YEAR + " and " + MAX_YEAR);
-        }
-        if (request.genre() == null) {
-            errors.put("genre", "Genre is required");
-        }
-        if (request.condition() == null) {
-            errors.put("condition", "Condition is required");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation failed", errors);
-        }
     }
 
     public Optional<VinylRecord> findById(Long id) {
@@ -100,9 +65,6 @@ public class RecordService {
     public VinylRecord update(Long id, RecordUpdateRequest request) {
         VinylRecord record = recordRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("VinylRecord", id));
-
-        // Validate update request
-        validateUpdateRequest(request);
 
         if (request.title() != null) {
             record.setTitle(request.title().trim());
@@ -131,27 +93,6 @@ public class RecordService {
         record.setUpdatedAt(LocalDateTime.now());
 
         return recordRepository.update(record);
-    }
-
-    private void validateUpdateRequest(RecordUpdateRequest request) {
-        Map<String, String> errors = new HashMap<>();
-
-        // If title is provided, it must not be blank
-        if (request.title() != null && request.title().trim().isEmpty()) {
-            errors.put("title", "Title cannot be blank");
-        }
-        // If artist is provided, it must not be blank
-        if (request.artist() != null && request.artist().trim().isEmpty()) {
-            errors.put("artist", "Artist cannot be blank");
-        }
-        // If releaseYear is provided, it must be in valid range
-        if (request.releaseYear() != null && (request.releaseYear() < MIN_YEAR || request.releaseYear() > MAX_YEAR)) {
-            errors.put("releaseYear", "Release year must be between " + MIN_YEAR + " and " + MAX_YEAR);
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation failed", errors);
-        }
     }
 
     @Transactional

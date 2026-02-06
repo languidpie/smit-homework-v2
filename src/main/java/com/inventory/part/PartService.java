@@ -1,16 +1,13 @@
 package com.inventory.part;
 
 import com.inventory.exception.NotFoundException;
-import com.inventory.exception.ValidationException;
 import com.inventory.part.dto.PartCreateRequest;
 import com.inventory.part.dto.PartUpdateRequest;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,9 +28,6 @@ public class PartService {
 
     @Transactional
     public Part create(PartCreateRequest request) {
-        // Additional service-level validation
-        validateCreateRequest(request);
-
         Part part = new Part();
         part.setName(request.name().trim());
         part.setDescription(request.description() != null ? request.description().trim() : "");
@@ -46,32 +40,6 @@ public class PartService {
         part.setUpdatedAt(LocalDateTime.now());
 
         return partRepository.save(part);
-    }
-
-    private void validateCreateRequest(PartCreateRequest request) {
-        Map<String, String> errors = new HashMap<>();
-
-        if (request.name() == null || request.name().trim().isEmpty()) {
-            errors.put("name", "Name is required and cannot be blank");
-        }
-        if (request.type() == null) {
-            errors.put("type", "Type is required");
-        }
-        if (request.location() == null || request.location().trim().isEmpty()) {
-            errors.put("location", "Location is required and cannot be blank");
-        }
-        if (request.quantity() == null) {
-            errors.put("quantity", "Quantity is required");
-        } else if (request.quantity() < 1) {
-            errors.put("quantity", "Quantity must be at least 1");
-        }
-        if (request.condition() == null) {
-            errors.put("condition", "Condition is required");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation failed", errors);
-        }
     }
 
     public Optional<Part> findById(Long id) {
@@ -94,9 +62,6 @@ public class PartService {
     public Part update(Long id, PartUpdateRequest request) {
         Part part = partRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Part", id));
-
-        // Validate update request
-        validateUpdateRequest(request);
 
         if (request.name() != null) {
             part.setName(request.name().trim());
@@ -122,27 +87,6 @@ public class PartService {
         part.setUpdatedAt(LocalDateTime.now());
 
         return partRepository.update(part);
-    }
-
-    private void validateUpdateRequest(PartUpdateRequest request) {
-        Map<String, String> errors = new HashMap<>();
-
-        // If name is provided, it must not be blank
-        if (request.name() != null && request.name().trim().isEmpty()) {
-            errors.put("name", "Name cannot be blank");
-        }
-        // If location is provided, it must not be blank
-        if (request.location() != null && request.location().trim().isEmpty()) {
-            errors.put("location", "Location cannot be blank");
-        }
-        // If quantity is provided, it must be at least 1
-        if (request.quantity() != null && request.quantity() < 1) {
-            errors.put("quantity", "Quantity must be at least 1");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation failed", errors);
-        }
     }
 
     @Transactional
