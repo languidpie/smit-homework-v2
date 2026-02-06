@@ -8,6 +8,7 @@ import io.micronaut.security.authentication.AuthenticationRequest;
 import io.micronaut.security.authentication.AuthenticationResponse;
 import io.micronaut.security.authentication.provider.HttpRequestAuthenticationProvider;
 import jakarta.inject.Singleton;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,12 @@ import java.util.Map;
 @Singleton
 public class AuthenticationProviderUserPassword<B> implements HttpRequestAuthenticationProvider<B> {
 
+    private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+
+    // Passwords hashed with BCrypt (mart123, katrin123)
     private static final Map<String, UserCredentials> USERS = Map.of(
-            "mart", new UserCredentials("mart123", List.of("ROLE_PARTS")),
-            "katrin", new UserCredentials("katrin123", List.of("ROLE_RECORDS"))
+            "mart", new UserCredentials("$2a$12$AnBLNLp0.JrvxnnEh0IGQOFuGYrwCIIVfXCj1tg6DsoFVLTHheLhW", List.of("ROLE_PARTS")),
+            "katrin", new UserCredentials("$2a$12$2l6BOapDlZcMruaGQfVFeOM.pfICYR9MZ7Kz91KBSdSZnq55DT52S", List.of("ROLE_RECORDS"))
     );
 
     @Override
@@ -34,12 +38,12 @@ public class AuthenticationProviderUserPassword<B> implements HttpRequestAuthent
             return AuthenticationResponse.failure(AuthenticationFailureReason.USER_NOT_FOUND);
         }
 
-        if (!user.password().equals(password)) {
+        if (!PASSWORD_ENCODER.matches(password, user.passwordHash())) {
             return AuthenticationResponse.failure(AuthenticationFailureReason.CREDENTIALS_DO_NOT_MATCH);
         }
 
         return AuthenticationResponse.success(username, user.roles());
     }
 
-    private record UserCredentials(String password, List<String> roles) {}
+    private record UserCredentials(String passwordHash, List<String> roles) {}
 }
