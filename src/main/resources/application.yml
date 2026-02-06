@@ -80,5 +80,5 @@ jackson:
 
 logger:
   levels:
-    com.inventory: DEBUG
-    io.micronaut.data.query: DEBUG
+    com.inventory: INFO
+    io.micronaut.data.query: INFO
