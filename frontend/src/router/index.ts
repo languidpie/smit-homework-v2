@@ -64,6 +64,11 @@ const routes: RouteRecordRaw[] = [
     name: 'records-edit',
     component: () => import('@/views/RecordFormView.vue'),
     meta: { title: 'Edit Record', requiresAuth: true, requiredRole: 'ROLE_RECORDS' }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    redirect: { name: 'home' }
   }
 ]
 
