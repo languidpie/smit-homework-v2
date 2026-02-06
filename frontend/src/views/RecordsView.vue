@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useRecordsStore } from '@/stores/records'
 import { GENRES } from '@/types/record'
@@ -53,6 +53,21 @@ function dismissDeleteError() {
 function retryFetch() {
   store.clearError()
   store.fetchAll()
+}
+
+const sortableColumns = [
+  { field: 'title', label: 'Title / Artist', align: 'text-left' },
+  { field: 'releaseYear', label: 'Year', align: 'text-center' },
+  { field: 'genre', label: 'Genre', align: 'text-left' },
+  { field: 'condition', label: 'Condition', align: 'text-left' }
+]
+
+const isSearching = computed(() => !!store.searchQuery)
+
+function handleSort(field: string) {
+  if (!isSearching.value) {
+    store.toggleSort(field)
+  }
 }
 </script>
 
@@ -155,10 +170,22 @@ function retryFetch() {
         <table class="min-w-full divide-y divide-gray-200 bg-white rounded-lg shadow">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title / Artist</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Genre</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condition</th>
+              <th
+                v-for="col in sortableColumns"
+                :key="col.field"
+                class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider select-none"
+                :class="[col.align, isSearching ? '' : 'cursor-pointer hover:text-gray-700']"
+                @click="handleSort(col.field)"
+              >
+                <span class="inline-flex items-center gap-1">
+                  {{ col.label }}
+                  <template v-if="!isSearching">
+                    <svg v-if="store.sortField === col.field && store.sortDirection === 'ASC'" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 13l5-5 5 5H5z"/></svg>
+                    <svg v-else-if="store.sortField === col.field && store.sortDirection === 'DESC'" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 7l5 5 5-5H5z"/></svg>
+                    <svg v-else class="w-3 h-3 opacity-30" fill="currentColor" viewBox="0 0 20 20"><path d="M7 8l3-3 3 3H7zm0 4l3 3 3-3H7z"/></svg>
+                  </template>
+                </span>
+              </th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>

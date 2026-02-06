@@ -2,8 +2,12 @@ import { apiGet, apiPost, apiPut, apiDelete } from './client'
 import type { VinylRecord, RecordCreateRequest, RecordUpdateRequest, Page } from '@/types/record'
 
 export const recordsApi = {
-  getAll(page = 0, size = 20): Promise<Page<VinylRecord>> {
-    return apiGet<Page<VinylRecord>>(`/records?page=${page}&size=${size}`)
+  getAll(page = 0, size = 20, sort?: string, direction?: string): Promise<Page<VinylRecord>> {
+    let url = `/records?page=${page}&size=${size}`
+    if (sort) {
+      url += `&sort=${sort}&direction=${direction}`
+    }
+    return apiGet<Page<VinylRecord>>(url)
   },
 
   search(query: string): Promise<VinylRecord[]> {

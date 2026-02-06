@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Part, PartCreateRequest, PartUpdateRequest, PartType, Page } from '@/types/part'
+import type { SortDirection } from '@/types/common'
 import { partsApi } from '@/api/parts'
 import { ApiException } from '@/api/client'
 
@@ -17,6 +18,10 @@ export const usePartsStore = defineStore('parts', () => {
   const pageSize = ref(20)
   const totalElements = ref(0)
   const totalPages = ref(0)
+
+  // Sort state
+  const sortField = ref<string | null>(null)
+  const sortDirection = ref<SortDirection>('ASC')
 
   const filteredParts = computed(() => {
     const source = searchQuery.value ? searchResults.value : parts.value
@@ -45,7 +50,12 @@ export const usePartsStore = defineStore('parts', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await partsApi.getAll(page, pageSize.value)
+      const response = await partsApi.getAll(
+        page,
+        pageSize.value,
+        sortField.value ?? undefined,
+        sortDirection.value
+      )
       parts.value = response.content
       currentPage.value = response.pageNumber
       totalElements.value = response.totalElements
@@ -125,7 +135,11 @@ export const usePartsStore = defineStore('parts', () => {
   async function deletePart(id: number): Promise<void> {
     try {
       await partsApi.delete(id)
-      await fetchAll(currentPage.value)
+      if (searchQuery.value) {
+        await searchServer(searchQuery.value)
+      } else {
+        await fetchAll(currentPage.value)
+      }
     } catch (e) {
       if (e instanceof ApiException) {
         throw new Error(e.userMessage)
@@ -146,6 +160,21 @@ export const usePartsStore = defineStore('parts', () => {
     return parts.value.find(p => p.id === id)
   }
 
+  function toggleSort(field: string) {
+    if (sortField.value === field) {
+      if (sortDirection.value === 'ASC') {
+        sortDirection.value = 'DESC'
+      } else {
+        sortField.value = null
+        sortDirection.value = 'ASC'
+      }
+    } else {
+      sortField.value = field
+      sortDirection.value = 'ASC'
+    }
+    fetchAll(0)
+  }
+
   function clearError() {
     error.value = null
   }
@@ -163,7 +192,10 @@ export const usePartsStore = defineStore('parts', () => {
     totalPages,
     hasPreviousPage,
     hasNextPage,
+    sortField,
+    sortDirection,
     fetchAll,
+    toggleSort,
     searchServer,
     nextPage,
     previousPage,

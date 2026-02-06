@@ -7,3 +7,5 @@ export interface Page<T> {
   first: boolean
   last: boolean
 }
+
+export type SortDirection = 'ASC' | 'DESC'

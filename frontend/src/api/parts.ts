@@ -2,8 +2,12 @@ import { apiGet, apiPost, apiPut, apiDelete } from './client'
 import type { Part, PartCreateRequest, PartUpdateRequest, Page } from '@/types/part'
 
 export const partsApi = {
-  getAll(page = 0, size = 20): Promise<Page<Part>> {
-    return apiGet<Page<Part>>(`/parts?page=${page}&size=${size}`)
+  getAll(page = 0, size = 20, sort?: string, direction?: string): Promise<Page<Part>> {
+    let url = `/parts?page=${page}&size=${size}`
+    if (sort) {
+      url += `&sort=${sort}&direction=${direction}`
+    }
+    return apiGet<Page<Part>>(url)
   },
 
   search(query: string): Promise<Part[]> {

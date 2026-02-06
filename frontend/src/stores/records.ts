@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { VinylRecord, RecordCreateRequest, RecordUpdateRequest, Genre, Page } from '@/types/record'
+import type { SortDirection } from '@/types/common'
 import { recordsApi } from '@/api/records'
 import { ApiException } from '@/api/client'
 
@@ -17,6 +18,10 @@ export const useRecordsStore = defineStore('records', () => {
   const pageSize = ref(20)
   const totalElements = ref(0)
   const totalPages = ref(0)
+
+  // Sort state
+  const sortField = ref<string | null>(null)
+  const sortDirection = ref<SortDirection>('ASC')
 
   const filteredRecords = computed(() => {
     const source = searchQuery.value ? searchResults.value : records.value
@@ -45,7 +50,12 @@ export const useRecordsStore = defineStore('records', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await recordsApi.getAll(page, pageSize.value)
+      const response = await recordsApi.getAll(
+        page,
+        pageSize.value,
+        sortField.value ?? undefined,
+        sortDirection.value
+      )
       records.value = response.content
       currentPage.value = response.pageNumber
       totalElements.value = response.totalElements
@@ -125,7 +135,11 @@ export const useRecordsStore = defineStore('records', () => {
   async function deleteRecord(id: number): Promise<void> {
     try {
       await recordsApi.delete(id)
-      await fetchAll(currentPage.value)
+      if (searchQuery.value) {
+        await searchServer(searchQuery.value)
+      } else {
+        await fetchAll(currentPage.value)
+      }
     } catch (e) {
       if (e instanceof ApiException) {
         throw new Error(e.userMessage)
@@ -146,6 +160,21 @@ export const useRecordsStore = defineStore('records', () => {
     return records.value.find(r => r.id === id)
   }
 
+  function toggleSort(field: string) {
+    if (sortField.value === field) {
+      if (sortDirection.value === 'ASC') {
+        sortDirection.value = 'DESC'
+      } else {
+        sortField.value = null
+        sortDirection.value = 'ASC'
+      }
+    } else {
+      sortField.value = field
+      sortDirection.value = 'ASC'
+    }
+    fetchAll(0)
+  }
+
   function clearError() {
     error.value = null
   }
@@ -163,7 +192,10 @@ export const useRecordsStore = defineStore('records', () => {
     totalPages,
     hasPreviousPage,
     hasNextPage,
+    sortField,
+    sortDirection,
     fetchAll,
+    toggleSort,
     searchServer,
     nextPage,
     previousPage,

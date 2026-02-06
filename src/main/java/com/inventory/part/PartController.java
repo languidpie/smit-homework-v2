@@ -6,7 +6,9 @@ import com.inventory.exception.NotFoundException;
 import com.inventory.part.dto.PartCreateRequest;
 import com.inventory.part.dto.PartResponse;
 import com.inventory.part.dto.PartUpdateRequest;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.data.model.Sort;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
@@ -24,6 +26,7 @@ import io.micronaut.security.annotation.Secured;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 /**
  * REST controller for managing bicycle parts.
@@ -67,14 +70,30 @@ public class PartController {
                 .orElseThrow(() -> new NotFoundException("Part", id));
     }
 
+    private static final Set<String> SORTABLE_FIELDS = Set.of("name", "type", "location", "quantity", "condition");
+
     @Get
     @Operation(summary = "Get all parts", description = "Retrieve all bicycle parts in the inventory with pagination")
     @ApiResponse(responseCode = "200", description = "Paginated list of parts")
-    public PageResponse<PartResponse> findAll(
+    @ApiResponse(responseCode = "400", description = "Invalid sort field")
+    public HttpResponse<?> findAll(
             @Parameter(description = "Page number (0-based)") @QueryValue(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @QueryValue(defaultValue = "20") int size) {
-        Pageable pageable = Pageable.from(page, size);
-        return PageResponse.from(partService.findAll(pageable), PartResponse::fromEntity);
+            @Parameter(description = "Page size") @QueryValue(defaultValue = "20") int size,
+            @Parameter(description = "Sort field") @Nullable @QueryValue String sort,
+            @Parameter(description = "Sort direction (ASC or DESC)") @Nullable @QueryValue String direction) {
+        if (sort != null && !SORTABLE_FIELDS.contains(sort)) {
+            return HttpResponse.badRequest("Invalid sort field: " + sort);
+        }
+        Pageable pageable;
+        if (sort != null) {
+            Sort.Order order = "DESC".equalsIgnoreCase(direction)
+                    ? Sort.Order.desc(sort)
+                    : Sort.Order.asc(sort);
+            pageable = Pageable.from(page, size, Sort.of(order));
+        } else {
+            pageable = Pageable.from(page, size);
+        }
+        return HttpResponse.ok(PageResponse.from(partService.findAll(pageable), PartResponse::fromEntity));
     }
 
     @Get("/type/{type}")
