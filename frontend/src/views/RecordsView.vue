@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import { useRecordsStore } from '@/stores/records'
 import { GENRES } from '@/types/record'
 import type { Genre } from '@/types/record'
-import RecordCard from '@/components/records/RecordCard.vue'
+import RecordListItem from '@/components/records/RecordListItem.vue'
 
 const store = useRecordsStore()
 const searchInput = ref('')
@@ -139,15 +139,28 @@ function retryFetch() {
       </RouterLink>
     </div>
 
-    <!-- Records grid -->
+    <!-- Records table -->
     <template v-else>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <RecordCard
-          v-for="record in store.filteredRecords"
-          :key="record.id"
-          :record="record"
-          @delete="handleDelete"
-        />
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 bg-white rounded-lg shadow">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title / Artist</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Genre</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condition</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <RecordListItem
+              v-for="record in store.filteredRecords"
+              :key="record.id"
+              :record="record"
+              @delete="handleDelete"
+            />
+          </tbody>
+        </table>
       </div>
 
       <!-- Pagination controls -->

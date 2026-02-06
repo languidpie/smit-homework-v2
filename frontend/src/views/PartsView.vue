@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import { usePartsStore } from '@/stores/parts'
 import { PART_TYPES } from '@/types/part'
 import type { PartType } from '@/types/part'
-import PartCard from '@/components/parts/PartCard.vue'
+import PartListItem from '@/components/parts/PartListItem.vue'
 
 const store = usePartsStore()
 const searchInput = ref('')
@@ -145,15 +145,29 @@ function retryFetch() {
       </RouterLink>
     </div>
 
-    <!-- Parts grid -->
+    <!-- Parts table -->
     <template v-else>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <PartCard
-          v-for="part in store.filteredParts"
-          :key="part.id"
-          :part="part"
-          @delete="handleDelete"
-        />
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 bg-white rounded-lg shadow">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condition</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <PartListItem
+              v-for="part in store.filteredParts"
+              :key="part.id"
+              :part="part"
+              @delete="handleDelete"
+            />
+          </tbody>
+        </table>
       </div>
 
       <!-- Pagination controls -->
