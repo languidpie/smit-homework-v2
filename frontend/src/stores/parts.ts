@@ -6,6 +6,7 @@ import { ApiException } from '@/api/client'
 
 export const usePartsStore = defineStore('parts', () => {
   const parts = ref<Part[]>([])
+  const searchResults = ref<Part[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const selectedType = ref<PartType | null>(null)
@@ -18,22 +19,13 @@ export const usePartsStore = defineStore('parts', () => {
   const totalPages = ref(0)
 
   const filteredParts = computed(() => {
-    let result = [...parts.value]
+    const source = searchQuery.value ? searchResults.value : parts.value
 
     if (selectedType.value) {
-      result = result.filter(p => p.type === selectedType.value)
+      return source.filter(p => p.type === selectedType.value)
     }
 
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase()
-      result = result.filter(p =>
-        p.name.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query) ||
-        p.location.toLowerCase().includes(query)
-      )
-    }
-
-    return result
+    return source
   })
 
   const totalParts = computed(() => totalElements.value)
@@ -83,10 +75,28 @@ export const usePartsStore = defineStore('parts', () => {
     }
   }
 
+  async function searchServer(query: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      searchResults.value = await partsApi.search(query)
+    } catch (e) {
+      if (e instanceof ApiException) {
+        error.value = e.userMessage
+      } else if (e instanceof Error) {
+        error.value = `Search failed: ${e.message}`
+      } else {
+        error.value = 'Search failed. Please try again.'
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function createPart(data: PartCreateRequest): Promise<Part> {
     try {
       const newPart = await partsApi.create(data)
-      parts.value.push(newPart)
+      await fetchAll(currentPage.value)
       return newPart
     } catch (e) {
       if (e instanceof ApiException) {
@@ -115,7 +125,7 @@ export const usePartsStore = defineStore('parts', () => {
   async function deletePart(id: number): Promise<void> {
     try {
       await partsApi.delete(id)
-      parts.value = parts.value.filter(p => p.id !== id)
+      await fetchAll(currentPage.value)
     } catch (e) {
       if (e instanceof ApiException) {
         throw new Error(e.userMessage)
@@ -154,6 +164,7 @@ export const usePartsStore = defineStore('parts', () => {
     hasPreviousPage,
     hasNextPage,
     fetchAll,
+    searchServer,
     nextPage,
     previousPage,
     createPart,

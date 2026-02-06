@@ -72,10 +72,14 @@ describe('Parts Store', () => {
   })
 
   it('filters parts by search query', async () => {
-    const store = usePartsStore()
-    store.parts = mockParts
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([mockParts[0]])
+    } as Response)
 
+    const store = usePartsStore()
     store.setSearchQuery('shimano')
+    await store.searchServer('shimano')
 
     expect(store.filteredParts).toHaveLength(1)
     expect(store.filteredParts[0].name).toContain('Shimano')

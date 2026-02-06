@@ -5,6 +5,7 @@ import { useRecordsStore } from '@/stores/records'
 import { GENRES } from '@/types/record'
 import type { Genre } from '@/types/record'
 import RecordListItem from '@/components/records/RecordListItem.vue'
+import { debounce } from '@/utils/debounce'
 
 const store = useRecordsStore()
 const searchInput = ref('')
@@ -14,8 +15,17 @@ onMounted(() => {
   store.fetchAll()
 })
 
+const debouncedSearch = debounce((query: string) => {
+  store.setSearchQuery(query)
+  if (query) {
+    store.searchServer(query)
+  } else {
+    store.fetchAll()
+  }
+}, 300)
+
 function handleSearch() {
-  store.setSearchQuery(searchInput.value)
+  debouncedSearch(searchInput.value)
 }
 
 function handleGenreFilter(genre: Genre | null) {

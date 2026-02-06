@@ -74,10 +74,14 @@ describe('Records Store', () => {
   })
 
   it('filters records by search query', async () => {
-    const store = useRecordsStore()
-    store.records = mockRecords
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([mockRecords[0]])
+    } as Response)
 
+    const store = useRecordsStore()
     store.setSearchQuery('beatles')
+    await store.searchServer('beatles')
 
     expect(store.filteredRecords).toHaveLength(1)
     expect(store.filteredRecords[0].artist).toContain('Beatles')

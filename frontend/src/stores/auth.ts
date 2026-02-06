@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, LoginCredentials } from '@/types/auth'
 
-const AUTH_STORAGE_KEY = 'auth_credentials'
+const AUTH_STORAGE_KEY = 'auth_session'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
       const userInfo: User = await response.json()
       user.value = userInfo
       credentials.value = token
-      localStorage.setItem(AUTH_STORAGE_KEY, token)
+      sessionStorage.setItem(AUTH_STORAGE_KEY, token)
       return true
     } catch {
       return false
@@ -44,11 +44,11 @@ export const useAuthStore = defineStore('auth', () => {
   function logout(): void {
     user.value = null
     credentials.value = null
-    localStorage.removeItem(AUTH_STORAGE_KEY)
+    sessionStorage.removeItem(AUTH_STORAGE_KEY)
   }
 
   async function restoreSession(): Promise<boolean> {
-    const storedToken = localStorage.getItem(AUTH_STORAGE_KEY)
+    const storedToken = sessionStorage.getItem(AUTH_STORAGE_KEY)
     if (!storedToken) {
       sessionChecked.value = true
       return false
@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
 
       if (!response.ok) {
-        localStorage.removeItem(AUTH_STORAGE_KEY)
+        sessionStorage.removeItem(AUTH_STORAGE_KEY)
         sessionChecked.value = true
         return false
       }
@@ -73,7 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
       sessionChecked.value = true
       return true
     } catch {
-      localStorage.removeItem(AUTH_STORAGE_KEY)
+      sessionStorage.removeItem(AUTH_STORAGE_KEY)
       sessionChecked.value = true
       return false
     }

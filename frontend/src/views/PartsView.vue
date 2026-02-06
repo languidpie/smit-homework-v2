@@ -5,6 +5,7 @@ import { usePartsStore } from '@/stores/parts'
 import { PART_TYPES } from '@/types/part'
 import type { PartType } from '@/types/part'
 import PartListItem from '@/components/parts/PartListItem.vue'
+import { debounce } from '@/utils/debounce'
 
 const store = usePartsStore()
 const searchInput = ref('')
@@ -14,8 +15,17 @@ onMounted(() => {
   store.fetchAll()
 })
 
+const debouncedSearch = debounce((query: string) => {
+  store.setSearchQuery(query)
+  if (query) {
+    store.searchServer(query)
+  } else {
+    store.fetchAll()
+  }
+}, 300)
+
 function handleSearch() {
-  store.setSearchQuery(searchInput.value)
+  debouncedSearch(searchInput.value)
 }
 
 function handleTypeFilter(type: PartType | null) {

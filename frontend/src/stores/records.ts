@@ -6,6 +6,7 @@ import { ApiException } from '@/api/client'
 
 export const useRecordsStore = defineStore('records', () => {
   const records = ref<VinylRecord[]>([])
+  const searchResults = ref<VinylRecord[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const selectedGenre = ref<Genre | null>(null)
@@ -18,22 +19,13 @@ export const useRecordsStore = defineStore('records', () => {
   const totalPages = ref(0)
 
   const filteredRecords = computed(() => {
-    let result = [...records.value]
+    const source = searchQuery.value ? searchResults.value : records.value
 
     if (selectedGenre.value) {
-      result = result.filter(r => r.genre === selectedGenre.value)
+      return source.filter(r => r.genre === selectedGenre.value)
     }
 
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase()
-      result = result.filter(r =>
-        r.title.toLowerCase().includes(query) ||
-        r.artist.toLowerCase().includes(query) ||
-        r.notes?.toLowerCase().includes(query)
-      )
-    }
-
-    return result
+    return source
   })
 
   const totalRecords = computed(() => totalElements.value)
@@ -83,10 +75,28 @@ export const useRecordsStore = defineStore('records', () => {
     }
   }
 
+  async function searchServer(query: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      searchResults.value = await recordsApi.search(query)
+    } catch (e) {
+      if (e instanceof ApiException) {
+        error.value = e.userMessage
+      } else if (e instanceof Error) {
+        error.value = `Search failed: ${e.message}`
+      } else {
+        error.value = 'Search failed. Please try again.'
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function createRecord(data: RecordCreateRequest): Promise<VinylRecord> {
     try {
       const newRecord = await recordsApi.create(data)
-      records.value.push(newRecord)
+      await fetchAll(currentPage.value)
       return newRecord
     } catch (e) {
       if (e instanceof ApiException) {
@@ -115,7 +125,7 @@ export const useRecordsStore = defineStore('records', () => {
   async function deleteRecord(id: number): Promise<void> {
     try {
       await recordsApi.delete(id)
-      records.value = records.value.filter(r => r.id !== id)
+      await fetchAll(currentPage.value)
     } catch (e) {
       if (e instanceof ApiException) {
         throw new Error(e.userMessage)
@@ -154,6 +164,7 @@ export const useRecordsStore = defineStore('records', () => {
     hasPreviousPage,
     hasNextPage,
     fetchAll,
+    searchServer,
     nextPage,
     previousPage,
     createRecord,

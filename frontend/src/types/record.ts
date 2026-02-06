@@ -58,15 +58,7 @@ export interface RecordUpdateRequest {
   notes?: string
 }
 
-export interface Page<T> {
-  content: T[]
-  pageNumber: number
-  pageSize: number
-  totalElements: number
-  totalPages: number
-  first: boolean
-  last: boolean
-}
+export type { Page } from './common'
 
 export const GENRES: { value: Genre; label: string }[] = [
   { value: 'ROCK', label: 'Rock' },
