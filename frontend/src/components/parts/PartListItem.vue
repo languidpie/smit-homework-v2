@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import type { Part } from '@/types/part'
 
@@ -10,6 +10,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   delete: [id: number]
 }>()
+
+const expanded = ref(false)
 
 const conditionColor = computed(() => {
   const colors: Record<string, string> = {
@@ -35,9 +37,10 @@ const typeIcon = computed(() => {
 </script>
 
 <template>
-  <tr class="hover:bg-gray-50" data-testid="part-list-item">
+  <tr class="hover:bg-gray-50 cursor-pointer" data-testid="part-list-item" @click="expanded = !expanded">
     <td class="px-4 py-3 whitespace-nowrap">
       <div class="flex items-center gap-2">
+        <span class="text-gray-400 text-xs transition-transform duration-200" :class="expanded ? 'rotate-90' : ''">&#9654;</span>
         <span class="text-lg">{{ typeIcon }}</span>
         <span class="font-medium text-gray-900">{{ part.name }}</span>
       </div>
@@ -62,16 +65,31 @@ const typeIcon = computed(() => {
           :to="`/parts/${part.id}/edit`"
           class="btn-secondary text-sm"
           data-testid="edit-btn"
+          @click.stop
         >
           Edit
         </RouterLink>
         <button
           class="btn-danger text-sm"
           data-testid="delete-btn"
-          @click="emit('delete', part.id)"
+          @click.stop="emit('delete', part.id)"
         >
           Delete
         </button>
+      </div>
+    </td>
+  </tr>
+  <tr v-if="expanded" class="bg-gray-50">
+    <td colspan="6" class="px-4 py-3 text-sm text-gray-700">
+      <div class="grid grid-cols-2 gap-4 max-w-xl">
+        <div>
+          <span class="font-medium text-gray-500">Description</span>
+          <p>{{ part.description || 'No description' }}</p>
+        </div>
+        <div>
+          <span class="font-medium text-gray-500">Notes</span>
+          <p>{{ part.notes || 'No notes' }}</p>
+        </div>
       </div>
     </td>
   </tr>
