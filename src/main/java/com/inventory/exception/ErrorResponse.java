@@ -1,0 +1,22 @@
+package com.inventory.exception;
+
+import io.micronaut.serde.annotation.Serdeable;
+
+import java.util.Map;
+
+/**
+ * Standard error response DTO for API error messages.
+ * Contains a user-friendly message and optional field-specific errors.
+ *
+ * @author Mari-Liis
+ * Date: 04.02.2026
+ */
+@Serdeable
+public record ErrorResponse(
+        String message,
+        Map<String, String> errors
+) {
+    public ErrorResponse(String message) {
+        this(message, null);
+    }
+}
