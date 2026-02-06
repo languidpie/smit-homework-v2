@@ -82,8 +82,6 @@ Interactive API documentation is available at:
 
 **http://localhost:8080/swagger-ui**
 
-Note: Swagger UI requires authentication. Use one of the credentials above.
-
 ### OpenAPI Specification
 
 The raw OpenAPI spec (YAML) is available at:

@@ -4,6 +4,8 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Produces;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import io.swagger.v3.oas.annotations.Hidden;
 
 /**
@@ -15,6 +17,7 @@ import io.swagger.v3.oas.annotations.Hidden;
  */
 @Controller
 @Hidden
+@Secured(SecurityRule.IS_ANONYMOUS)
 public class SwaggerController {
 
     private static final String SWAGGER_UI_HTML = """
