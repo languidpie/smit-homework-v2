@@ -24,7 +24,6 @@ micronaut:
           exposed-headers:
             - Authorization
   security:
-    authentication: bearer
     intercept-url-map:
       - pattern: /health
         http-method: GET
