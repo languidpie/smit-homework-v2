@@ -1,10 +1,12 @@
 package com.inventory.part;
 
+import com.inventory.common.PageResponse;
 import com.inventory.exception.ErrorResponse;
 import com.inventory.exception.NotFoundException;
 import com.inventory.part.dto.PartCreateRequest;
 import com.inventory.part.dto.PartResponse;
 import com.inventory.part.dto.PartUpdateRequest;
+import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
@@ -66,12 +68,13 @@ public class PartController {
     }
 
     @Get
-    @Operation(summary = "Get all parts", description = "Retrieve all bicycle parts in the inventory")
-    @ApiResponse(responseCode = "200", description = "List of all parts")
-    public List<PartResponse> findAll() {
-        return partService.findAll().stream()
-                .map(PartResponse::fromEntity)
-                .toList();
+    @Operation(summary = "Get all parts", description = "Retrieve all bicycle parts in the inventory with pagination")
+    @ApiResponse(responseCode = "200", description = "Paginated list of parts")
+    public PageResponse<PartResponse> findAll(
+            @Parameter(description = "Page number (0-based)") @QueryValue(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @QueryValue(defaultValue = "20") int size) {
+        Pageable pageable = Pageable.from(page, size);
+        return PageResponse.from(partService.findAll(pageable), PartResponse::fromEntity);
     }
 
     @Get("/type/{type}")

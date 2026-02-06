@@ -1,10 +1,12 @@
 package com.inventory.record;
 
+import com.inventory.common.PageResponse;
 import com.inventory.exception.ErrorResponse;
 import com.inventory.exception.NotFoundException;
 import com.inventory.record.dto.RecordCreateRequest;
 import com.inventory.record.dto.RecordResponse;
 import com.inventory.record.dto.RecordUpdateRequest;
+import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
@@ -66,12 +68,13 @@ public class RecordController {
     }
 
     @Get
-    @Operation(summary = "Get all records", description = "Retrieve all vinyl records in the collection")
-    @ApiResponse(responseCode = "200", description = "List of all records")
-    public List<RecordResponse> findAll() {
-        return recordService.findAll().stream()
-                .map(RecordResponse::fromEntity)
-                .toList();
+    @Operation(summary = "Get all records", description = "Retrieve all vinyl records in the collection with pagination")
+    @ApiResponse(responseCode = "200", description = "Paginated list of records")
+    public PageResponse<RecordResponse> findAll(
+            @Parameter(description = "Page number (0-based)") @QueryValue(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @QueryValue(defaultValue = "20") int size) {
+        Pageable pageable = Pageable.from(page, size);
+        return PageResponse.from(recordService.findAll(pageable), RecordResponse::fromEntity);
     }
 
     @Get("/genre/{genre}")

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { VinylRecord, RecordCreateRequest, RecordUpdateRequest, Genre } from '@/types/record'
+import type { VinylRecord, RecordCreateRequest, RecordUpdateRequest, Genre, Page } from '@/types/record'
 import { recordsApi } from '@/api/records'
 import { ApiException } from '@/api/client'
 
@@ -10,6 +10,12 @@ export const useRecordsStore = defineStore('records', () => {
   const error = ref<string | null>(null)
   const selectedGenre = ref<Genre | null>(null)
   const searchQuery = ref('')
+
+  // Pagination state
+  const currentPage = ref(0)
+  const pageSize = ref(20)
+  const totalElements = ref(0)
+  const totalPages = ref(0)
 
   const filteredRecords = computed(() => {
     let result = [...records.value]
@@ -30,7 +36,7 @@ export const useRecordsStore = defineStore('records', () => {
     return result
   })
 
-  const totalRecords = computed(() => records.value.length)
+  const totalRecords = computed(() => totalElements.value)
 
   const recordsByGenre = computed(() => {
     const counts: Record<string, number> = {}
@@ -40,11 +46,18 @@ export const useRecordsStore = defineStore('records', () => {
     return counts
   })
 
-  async function fetchAll() {
+  const hasPreviousPage = computed(() => currentPage.value > 0)
+  const hasNextPage = computed(() => currentPage.value < totalPages.value - 1)
+
+  async function fetchAll(page = 0) {
     isLoading.value = true
     error.value = null
     try {
-      records.value = await recordsApi.getAll()
+      const response = await recordsApi.getAll(page, pageSize.value)
+      records.value = response.content
+      currentPage.value = response.pageNumber
+      totalElements.value = response.totalElements
+      totalPages.value = response.totalPages
     } catch (e) {
       if (e instanceof ApiException) {
         error.value = e.userMessage
@@ -55,6 +68,18 @@ export const useRecordsStore = defineStore('records', () => {
       }
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function nextPage() {
+    if (hasNextPage.value) {
+      await fetchAll(currentPage.value + 1)
+    }
+  }
+
+  async function previousPage() {
+    if (hasPreviousPage.value) {
+      await fetchAll(currentPage.value - 1)
     }
   }
 
@@ -124,7 +149,13 @@ export const useRecordsStore = defineStore('records', () => {
     filteredRecords,
     totalRecords,
     recordsByGenre,
+    currentPage,
+    totalPages,
+    hasPreviousPage,
+    hasNextPage,
     fetchAll,
+    nextPage,
+    previousPage,
     createRecord,
     updateRecord,
     deleteRecord,

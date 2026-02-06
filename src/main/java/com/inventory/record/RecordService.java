@@ -3,6 +3,8 @@ package com.inventory.record;
 import com.inventory.exception.NotFoundException;
 import com.inventory.record.dto.RecordCreateRequest;
 import com.inventory.record.dto.RecordUpdateRequest;
+import io.micronaut.data.model.Page;
+import io.micronaut.data.model.Pageable;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 
@@ -51,6 +53,10 @@ public class RecordService {
 
     public List<VinylRecord> findAll() {
         return (List<VinylRecord>) recordRepository.findAll();
+    }
+
+    public Page<VinylRecord> findAll(Pageable pageable) {
+        return recordRepository.findAll(pageable);
     }
 
     public List<VinylRecord> findByGenre(Genre genre) {

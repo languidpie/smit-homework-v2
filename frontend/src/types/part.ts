@@ -35,6 +35,16 @@ export interface PartUpdateRequest {
   notes?: string
 }
 
+export interface Page<T> {
+  content: T[]
+  pageNumber: number
+  pageSize: number
+  totalElements: number
+  totalPages: number
+  first: boolean
+  last: boolean
+}
+
 export const PART_TYPES: { value: PartType; label: string }[] = [
   { value: 'FRAME', label: 'Frame' },
   { value: 'BRAKE', label: 'Brake' },

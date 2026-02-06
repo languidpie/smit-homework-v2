@@ -140,13 +140,41 @@ function retryFetch() {
     </div>
 
     <!-- Records grid -->
-    <div v-else class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <RecordCard
-        v-for="record in store.filteredRecords"
-        :key="record.id"
-        :record="record"
-        @delete="handleDelete"
-      />
-    </div>
+    <template v-else>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <RecordCard
+          v-for="record in store.filteredRecords"
+          :key="record.id"
+          :record="record"
+          @delete="handleDelete"
+        />
+      </div>
+
+      <!-- Pagination controls -->
+      <div v-if="store.totalPages > 1" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+        <div class="text-sm text-gray-700">
+          Page {{ store.currentPage + 1 }} of {{ store.totalPages }}
+          <span class="ml-2 text-gray-500">({{ store.totalRecords }} total items)</span>
+        </div>
+        <div class="flex gap-2">
+          <button
+            class="btn-secondary text-sm"
+            :disabled="!store.hasPreviousPage"
+            :class="{ 'opacity-50 cursor-not-allowed': !store.hasPreviousPage }"
+            @click="store.previousPage()"
+          >
+            Previous
+          </button>
+          <button
+            class="btn-secondary text-sm"
+            :disabled="!store.hasNextPage"
+            :class="{ 'opacity-50 cursor-not-allowed': !store.hasNextPage }"
+            @click="store.nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </template>
   </div>
 </template>

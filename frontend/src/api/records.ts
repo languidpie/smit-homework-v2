@@ -1,9 +1,9 @@
 import { apiGet, apiPost, apiPut, apiDelete } from './client'
-import type { VinylRecord, RecordCreateRequest, RecordUpdateRequest } from '@/types/record'
+import type { VinylRecord, RecordCreateRequest, RecordUpdateRequest, Page } from '@/types/record'
 
 export const recordsApi = {
-  getAll(): Promise<VinylRecord[]> {
-    return apiGet<VinylRecord[]>('/records')
+  getAll(page = 0, size = 20): Promise<Page<VinylRecord>> {
+    return apiGet<Page<VinylRecord>>(`/records?page=${page}&size=${size}`)
   },
 
   search(query: string): Promise<VinylRecord[]> {

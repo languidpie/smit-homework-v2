@@ -1,9 +1,9 @@
 import { apiGet, apiPost, apiPut, apiDelete } from './client'
-import type { Part, PartCreateRequest, PartUpdateRequest } from '@/types/part'
+import type { Part, PartCreateRequest, PartUpdateRequest, Page } from '@/types/part'
 
 export const partsApi = {
-  getAll(): Promise<Part[]> {
-    return apiGet<Part[]>('/parts')
+  getAll(page = 0, size = 20): Promise<Page<Part>> {
+    return apiGet<Page<Part>>(`/parts?page=${page}&size=${size}`)
   },
 
   search(query: string): Promise<Part[]> {

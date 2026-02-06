@@ -3,6 +3,8 @@ package com.inventory.part;
 import com.inventory.exception.NotFoundException;
 import com.inventory.part.dto.PartCreateRequest;
 import com.inventory.part.dto.PartUpdateRequest;
+import io.micronaut.data.model.Page;
+import io.micronaut.data.model.Pageable;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 
@@ -48,6 +50,10 @@ public class PartService {
 
     public List<Part> findAll() {
         return (List<Part>) partRepository.findAll();
+    }
+
+    public Page<Part> findAll(Pageable pageable) {
+        return partRepository.findAll(pageable);
     }
 
     public List<Part> findByType(PartType type) {

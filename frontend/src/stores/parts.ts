@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Part, PartCreateRequest, PartUpdateRequest, PartType } from '@/types/part'
+import type { Part, PartCreateRequest, PartUpdateRequest, PartType, Page } from '@/types/part'
 import { partsApi } from '@/api/parts'
 import { ApiException } from '@/api/client'
 
@@ -10,6 +10,12 @@ export const usePartsStore = defineStore('parts', () => {
   const error = ref<string | null>(null)
   const selectedType = ref<PartType | null>(null)
   const searchQuery = ref('')
+
+  // Pagination state
+  const currentPage = ref(0)
+  const pageSize = ref(20)
+  const totalElements = ref(0)
+  const totalPages = ref(0)
 
   const filteredParts = computed(() => {
     let result = [...parts.value]
@@ -30,7 +36,7 @@ export const usePartsStore = defineStore('parts', () => {
     return result
   })
 
-  const totalParts = computed(() => parts.value.length)
+  const totalParts = computed(() => totalElements.value)
 
   const partsByType = computed(() => {
     const counts: Record<string, number> = {}
@@ -40,11 +46,18 @@ export const usePartsStore = defineStore('parts', () => {
     return counts
   })
 
-  async function fetchAll() {
+  const hasPreviousPage = computed(() => currentPage.value > 0)
+  const hasNextPage = computed(() => currentPage.value < totalPages.value - 1)
+
+  async function fetchAll(page = 0) {
     isLoading.value = true
     error.value = null
     try {
-      parts.value = await partsApi.getAll()
+      const response = await partsApi.getAll(page, pageSize.value)
+      parts.value = response.content
+      currentPage.value = response.pageNumber
+      totalElements.value = response.totalElements
+      totalPages.value = response.totalPages
     } catch (e) {
       if (e instanceof ApiException) {
         error.value = e.userMessage
@@ -55,6 +68,18 @@ export const usePartsStore = defineStore('parts', () => {
       }
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function nextPage() {
+    if (hasNextPage.value) {
+      await fetchAll(currentPage.value + 1)
+    }
+  }
+
+  async function previousPage() {
+    if (hasPreviousPage.value) {
+      await fetchAll(currentPage.value - 1)
     }
   }
 
@@ -124,7 +149,13 @@ export const usePartsStore = defineStore('parts', () => {
     filteredParts,
     totalParts,
     partsByType,
+    currentPage,
+    totalPages,
+    hasPreviousPage,
+    hasNextPage,
     fetchAll,
+    nextPage,
+    previousPage,
     createPart,
     updatePart,
     deletePart,
