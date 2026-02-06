@@ -1,17 +1,24 @@
 # Inventory Management System
 
-A web application for managing two inventory collections:
-- **Vinyl Records** - Katrin's record collection
+A web application for managing two inventory collections with role-based access control:
 - **Bicycle Parts** - Mart's bike parts inventory
+- **Vinyl Records** - Katrin's record collection
 
 ## Prerequisites
 
 - Java 21
 - Node.js 18+
+- Docker (for PostgreSQL)
 
 ## Quick Start
 
-### 1. Start the Backend
+### 1. Start PostgreSQL
+
+```bash
+docker-compose up -d postgres
+```
+
+### 2. Start the Backend
 
 ```bash
 ./gradlew run
@@ -19,7 +26,7 @@ A web application for managing two inventory collections:
 
 The backend runs at **http://localhost:8080**
 
-### 2. Start the Frontend
+### 3. Start the Frontend
 
 ```bash
 cd frontend
@@ -29,6 +36,17 @@ npm run dev
 
 The frontend runs at **http://localhost:5173**
 
+## Authentication
+
+The application uses Basic Auth with two predefined users:
+
+| User | Password | Access |
+|------|----------|--------|
+| mart | mart123 | Bicycle Parts (`/api/parts`) |
+| katrin | katrin123 | Vinyl Records (`/api/records`) |
+
+Each user can only access their own inventory section.
+
 ## API Documentation
 
 ### Swagger UI
@@ -37,10 +55,7 @@ Interactive API documentation is available at:
 
 **http://localhost:8080/swagger-ui**
 
-Use Swagger UI to:
-- Browse all available endpoints
-- Test API requests directly in the browser
-- View request/response schemas
+Note: Swagger UI requires authentication. Use one of the credentials above.
 
 ### OpenAPI Specification
 
@@ -50,7 +65,13 @@ The raw OpenAPI spec (YAML) is available at:
 
 ## API Endpoints
 
-### Vinyl Records (`/api/records`)
+### Authentication (`/api/auth`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/auth/me` | Get current user info |
+
+### Vinyl Records (`/api/records`) - Katrin only
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -62,7 +83,7 @@ The raw OpenAPI spec (YAML) is available at:
 | GET | `/api/records/search?q=` | Search by title/artist |
 | GET | `/api/records/genre/{genre}` | Filter by genre |
 
-### Bicycle Parts (`/api/parts`)
+### Bicycle Parts (`/api/parts`) - Mart only
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -74,10 +95,23 @@ The raw OpenAPI spec (YAML) is available at:
 | GET | `/api/parts/search?q=` | Search by name |
 | GET | `/api/parts/type/{type}` | Filter by type |
 
+## Running with Docker
+
+To run the entire stack with Docker:
+
+```bash
+docker-compose up
+```
+
+This starts:
+- PostgreSQL on port 5432
+- Backend on port 8080
+- Frontend on port 80
+
 ## Running Tests
 
 ```bash
-# Backend tests
+# Backend tests (requires Docker for Testcontainers)
 ./gradlew test
 
 # Frontend tests
