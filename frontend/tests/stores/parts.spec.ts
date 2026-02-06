@@ -45,7 +45,13 @@ describe('Parts Store', () => {
   it('fetches all parts', async () => {
     vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockParts)
+      json: () => Promise.resolve({
+        content: mockParts,
+        pageNumber: 0,
+        pageSize: 20,
+        totalElements: 2,
+        totalPages: 1
+      })
     } as Response)
 
     const store = usePartsStore()
@@ -100,6 +106,6 @@ describe('Parts Store', () => {
     const store = usePartsStore()
     await store.fetchAll()
 
-    expect(store.error).toBe('Network error')
+    expect(store.error).toBe('Failed to load parts: Network error')
   })
 })

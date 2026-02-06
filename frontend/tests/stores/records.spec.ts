@@ -47,7 +47,13 @@ describe('Records Store', () => {
   it('fetches all records', async () => {
     vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockRecords)
+      json: () => Promise.resolve({
+        content: mockRecords,
+        pageNumber: 0,
+        pageSize: 20,
+        totalElements: 2,
+        totalPages: 1
+      })
     } as Response)
 
     const store = useRecordsStore()
@@ -102,6 +108,6 @@ describe('Records Store', () => {
     const store = useRecordsStore()
     await store.fetchAll()
 
-    expect(store.error).toBe('Network error')
+    expect(store.error).toBe('Failed to load records: Network error')
   })
 })
