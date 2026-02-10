@@ -82,7 +82,7 @@ Each user can only access their own inventory section.
 
 Interactive API documentation is available at:
 
-**http://localhost:8080/swagger-ui**
+**http://localhost:8080/swagger-ui/index.html**
 
 ### OpenAPI Specification
 
