@@ -22,10 +22,6 @@ public interface RecordRepository extends CrudRepository<VinylRecord, Long> {
 
     List<VinylRecord> findByCondition(RecordCondition condition);
 
-    List<VinylRecord> findByArtistContainsIgnoreCase(String artist);
-
-    List<VinylRecord> findByTitleContainsIgnoreCase(String title);
-
     @Query("SELECT * FROM vinyl_records WHERE LOWER(title) LIKE LOWER('%' || :query || '%') ESCAPE '\\' OR LOWER(artist) LIKE LOWER('%' || :query || '%') ESCAPE '\\'")
     List<VinylRecord> searchByTitleOrArtist(String query);
 

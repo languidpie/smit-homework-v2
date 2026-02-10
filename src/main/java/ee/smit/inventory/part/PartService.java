@@ -47,10 +47,6 @@ public class PartService {
         return partRepository.findById(id);
     }
 
-    public List<Part> findAll() {
-        return (List<Part>) partRepository.findAll();
-    }
-
     public Page<Part> findAll(Pageable pageable) {
         return partRepository.findAll(pageable);
     }
@@ -107,11 +103,4 @@ public class PartService {
         partRepository.delete(part);
     }
 
-    public long countByType(PartType type) {
-        return partRepository.countByType(type);
-    }
-
-    public long countTotal() {
-        return partRepository.count();
-    }
 }

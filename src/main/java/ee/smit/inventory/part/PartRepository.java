@@ -22,8 +22,6 @@ public interface PartRepository extends CrudRepository<Part, Long> {
 
     List<Part> findByCondition(PartCondition condition);
 
-    List<Part> findByLocationContainsIgnoreCase(String location);
-
     @Query("SELECT * FROM parts WHERE LOWER(name) LIKE LOWER('%' || :query || '%') ESCAPE '\\' OR LOWER(description) LIKE LOWER('%' || :query || '%') ESCAPE '\\'")
     List<Part> searchByNameOrDescription(String query);
 

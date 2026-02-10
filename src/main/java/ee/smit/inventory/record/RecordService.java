@@ -48,10 +48,6 @@ public class RecordService {
         return recordRepository.findById(id);
     }
 
-    public List<VinylRecord> findAll() {
-        return (List<VinylRecord>) recordRepository.findAll();
-    }
-
     public Page<VinylRecord> findAll(Pageable pageable) {
         return recordRepository.findAll(pageable);
     }
@@ -111,11 +107,4 @@ public class RecordService {
         recordRepository.delete(record);
     }
 
-    public long countByGenre(Genre genre) {
-        return recordRepository.countByGenre(genre);
-    }
-
-    public long countTotal() {
-        return recordRepository.count();
-    }
 }
