@@ -1,5 +1,6 @@
 package ee.smit.inventory.record;
 
+import ee.smit.inventory.common.QueryUtils;
 import ee.smit.inventory.exception.NotFoundException;
 import ee.smit.inventory.record.dto.RecordCreateRequest;
 import ee.smit.inventory.record.dto.RecordUpdateRequest;
@@ -57,13 +58,7 @@ public class RecordService {
     }
 
     public List<VinylRecord> search(String query) {
-        return recordRepository.searchByTitleOrArtist(escapeLikePattern(query));
-    }
-
-    static String escapeLikePattern(String input) {
-        return input.replace("\\", "\\\\")
-                    .replace("%", "\\%")
-                    .replace("_", "\\_");
+        return recordRepository.searchByTitleOrArtist(QueryUtils.escapeLikePattern(query));
     }
 
     @Transactional

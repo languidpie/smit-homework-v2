@@ -5,6 +5,7 @@ import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.serde.annotation.Serdeable;
 
+import io.micronaut.core.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -24,6 +25,7 @@ public class Part {
     @NotBlank
     private String name;
 
+    @Nullable
     private String description;
 
     @NotNull
@@ -38,6 +40,7 @@ public class Part {
     @NotNull
     private PartCondition condition;
 
+    @Nullable
     private String notes;
 
     private LocalDateTime createdAt;

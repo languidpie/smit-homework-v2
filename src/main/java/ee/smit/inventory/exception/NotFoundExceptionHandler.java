@@ -17,6 +17,6 @@ public class NotFoundExceptionHandler implements
 
     @Override
     public HttpResponse<ErrorResponse> handle(HttpRequest request, NotFoundException exception) {
-        return HttpResponse.notFound(new ErrorResponse("The requested item was not found."));
+        return HttpResponse.notFound(new ErrorResponse(exception.getMessage()));
     }
 }

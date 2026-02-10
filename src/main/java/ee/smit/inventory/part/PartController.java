@@ -115,6 +115,9 @@ public class PartController {
     @ApiResponse(responseCode = "200", description = "List of matching parts")
     public List<PartResponse> search(
             @Parameter(description = "Search query") @QueryValue String q) {
+        if (q == null || q.isBlank()) {
+            throw new ValidationException("q", "Search query must not be blank");
+        }
         return partService.search(q).stream()
                 .map(PartResponse::fromEntity)
                 .toList();

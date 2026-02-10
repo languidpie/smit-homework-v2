@@ -1,5 +1,6 @@
 package ee.smit.inventory.part;
 
+import ee.smit.inventory.common.QueryUtils;
 import ee.smit.inventory.exception.NotFoundException;
 import ee.smit.inventory.part.dto.PartCreateRequest;
 import ee.smit.inventory.part.dto.PartUpdateRequest;
@@ -56,13 +57,7 @@ public class PartService {
     }
 
     public List<Part> search(String query) {
-        return partRepository.searchByNameOrDescription(escapeLikePattern(query));
-    }
-
-    static String escapeLikePattern(String input) {
-        return input.replace("\\", "\\\\")
-                    .replace("%", "\\%")
-                    .replace("_", "\\_");
+        return partRepository.searchByNameOrDescription(QueryUtils.escapeLikePattern(query));
     }
 
     @Transactional
