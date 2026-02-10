@@ -161,7 +161,7 @@ export const usePartsStore = defineStore('parts', () => {
       }
     } catch (e) {
       if (e instanceof ApiException) {
-        throw new Error(e.userMessage)
+        throw e
       }
       throw new Error(`Failed to delete part: ${e instanceof Error ? e.message : 'Unknown error'}`)
     }

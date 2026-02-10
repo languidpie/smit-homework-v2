@@ -6,6 +6,7 @@ import { GENRES } from '@/types/record'
 import type { Genre } from '@/types/record'
 import RecordListItem from '@/components/records/RecordListItem.vue'
 import { debounce } from '@/utils/debounce'
+import { getErrorMessage } from '@/utils/validation'
 
 const store = useRecordsStore()
 const searchInput = ref('')
@@ -43,7 +44,7 @@ async function handleDelete(id: number) {
     try {
       await store.deleteRecord(id)
     } catch (e) {
-      deleteError.value = e instanceof Error ? e.message : 'Failed to delete record'
+      deleteError.value = getErrorMessage(e)
     }
   }
 }

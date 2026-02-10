@@ -161,7 +161,7 @@ export const useRecordsStore = defineStore('records', () => {
       }
     } catch (e) {
       if (e instanceof ApiException) {
-        throw new Error(e.userMessage)
+        throw e
       }
       throw new Error(`Failed to delete record: ${e instanceof Error ? e.message : 'Unknown error'}`)
     }

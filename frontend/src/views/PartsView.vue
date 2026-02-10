@@ -6,6 +6,7 @@ import { PART_TYPES } from '@/types/part'
 import type { PartType } from '@/types/part'
 import PartListItem from '@/components/parts/PartListItem.vue'
 import { debounce } from '@/utils/debounce'
+import { getErrorMessage } from '@/utils/validation'
 
 const store = usePartsStore()
 const searchInput = ref('')
@@ -43,7 +44,7 @@ async function handleDelete(id: number) {
     try {
       await store.deletePart(id)
     } catch (e) {
-      deleteError.value = e instanceof Error ? e.message : 'Failed to delete part'
+      deleteError.value = getErrorMessage(e)
     }
   }
 }
