@@ -34,7 +34,7 @@ dependencies {
     // OpenAPI / Swagger UI
     compileOnly("io.micronaut.openapi:micronaut-openapi-annotations")
     runtimeOnly("io.swagger.core.v3:swagger-annotations")
-    runtimeOnly("org.webjars:swagger-ui:5.10.3")
+    runtimeOnly("io.micronaut.openapi:micronaut-openapi-swagger-ui")
 
     // Micronaut Data JDBC
     implementation("io.micronaut.data:micronaut-data-jdbc")

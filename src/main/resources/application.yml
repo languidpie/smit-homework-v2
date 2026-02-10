@@ -29,13 +29,7 @@ micronaut:
         http-method: GET
         access:
           - isAnonymous()
-      - pattern: /swagger-ui
-        access:
-          - isAnonymous()
       - pattern: /swagger/**
-        access:
-          - isAnonymous()
-      - pattern: /webjars/**
         access:
           - isAnonymous()
       - pattern: /api/auth/**
@@ -52,9 +46,6 @@ micronaut:
       swagger:
         paths: classpath:META-INF/swagger
         mapping: /swagger/**
-      webjars:
-        paths: classpath:META-INF/resources/webjars
-        mapping: /webjars/**
 
 datasources:
   default:
