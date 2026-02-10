@@ -3,9 +3,6 @@ package com.inventory.record;
 /**
  * End-to-end integration tests for vinyl records API.
  * Tests complete workflows including validation errors and error responses.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 
 import com.inventory.exception.ErrorResponse;

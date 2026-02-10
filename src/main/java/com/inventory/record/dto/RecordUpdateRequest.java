@@ -12,9 +12,6 @@ import java.time.LocalDate;
 /**
  * DTO for updating an existing vinyl record.
  * All fields are optional for partial updates.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 public record RecordUpdateRequest(

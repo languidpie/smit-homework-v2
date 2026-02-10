@@ -7,9 +7,6 @@ import java.util.Map;
 /**
  * Standard error response DTO for API error messages.
  * Contains a user-friendly message and optional field-specific errors.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 public record ErrorResponse(

@@ -3,9 +3,6 @@ package com.inventory.record;
 /**
  * Integration tests for {@link RecordController}.
  * Tests HTTP endpoints for vinyl records CRUD operations using Micronaut HTTP client.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 
 import com.inventory.record.dto.RecordCreateRequest;

@@ -11,9 +11,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 /**
  * Controller for serving Swagger UI interface.
  * Provides an HTML page that loads the Swagger UI for API documentation.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Controller
 @Hidden

@@ -3,9 +3,6 @@ package com.inventory.part;
 /**
  * End-to-end integration tests for bicycle parts API.
  * Tests complete workflows including validation errors and error responses.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 
 import com.inventory.exception.ErrorResponse;

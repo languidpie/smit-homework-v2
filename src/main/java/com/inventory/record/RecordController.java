@@ -32,9 +32,6 @@ import java.util.Set;
 /**
  * REST controller for managing vinyl records.
  * Provides CRUD operations for Katrin's vinyl record collection.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Controller("/api/records")
 @ExecuteOn(TaskExecutors.BLOCKING)

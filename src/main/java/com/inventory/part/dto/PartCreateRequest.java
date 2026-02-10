@@ -11,9 +11,6 @@ import jakarta.validation.constraints.Size;
 
 /**
  * DTO for creating a new bicycle part.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 public record PartCreateRequest(

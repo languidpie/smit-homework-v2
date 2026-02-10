@@ -10,9 +10,6 @@ import java.time.LocalDateTime;
 
 /**
  * DTO for returning vinyl record data in API responses.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 public record RecordResponse(

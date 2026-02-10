@@ -3,9 +3,6 @@ package com.inventory.part;
 /**
  * Repository tests for {@link PartRepository}.
  * Tests database operations for bicycle parts using H2 in-memory database.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;

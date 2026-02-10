@@ -13,9 +13,6 @@ import java.time.LocalDate;
 
 /**
  * DTO for creating a new vinyl record.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 public record RecordCreateRequest(

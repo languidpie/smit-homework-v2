@@ -3,9 +3,6 @@ package com.inventory.part;
 /**
  * Unit tests for {@link PartService}.
  * Tests business logic for bicycle parts using Mockito for repository mocking.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 
 import com.inventory.exception.NotFoundException;

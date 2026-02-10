@@ -15,9 +15,6 @@ import java.util.Optional;
 /**
  * Service class for {@link Part} entity.
  * Handles business logic and validation for bicycle parts.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Singleton
 public class PartService {

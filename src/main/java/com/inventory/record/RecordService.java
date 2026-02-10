@@ -15,9 +15,6 @@ import java.util.Optional;
 /**
  * Service class for {@link VinylRecord} entity.
  * Handles business logic and validation for vinyl records.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Singleton
 public class RecordService {

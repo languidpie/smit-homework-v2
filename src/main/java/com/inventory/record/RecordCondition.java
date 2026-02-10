@@ -4,9 +4,6 @@ import io.micronaut.serde.annotation.Serdeable;
 
 /**
  * Enumeration of vinyl record conditions using standard grading.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 public enum RecordCondition {

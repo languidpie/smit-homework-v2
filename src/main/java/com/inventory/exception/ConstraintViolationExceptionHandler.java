@@ -16,9 +16,6 @@ import java.util.Map;
 /**
  * Exception handler for Bean Validation constraint violations.
  * Converts validation errors to user-friendly field-specific messages.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Produces
 @Singleton

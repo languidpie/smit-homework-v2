@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Catch-all exception handler for unexpected errors.
  * Logs the error details and returns a generic user-friendly message.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Produces
 @Singleton

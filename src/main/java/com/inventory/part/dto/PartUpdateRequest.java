@@ -10,9 +10,6 @@ import jakarta.validation.constraints.Size;
 /**
  * DTO for updating an existing bicycle part.
  * All fields are optional for partial updates.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 public record PartUpdateRequest(

@@ -3,9 +3,6 @@ package com.inventory.part;
 /**
  * Integration tests for {@link PartController}.
  * Tests HTTP endpoints for bicycle parts CRUD operations using Micronaut HTTP client.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 
 import com.inventory.part.dto.PartCreateRequest;

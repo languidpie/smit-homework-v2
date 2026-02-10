@@ -32,9 +32,6 @@ import java.util.Set;
 /**
  * REST controller for managing bicycle parts.
  * Provides CRUD operations for Mart's bicycle parts inventory.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Controller("/api/parts")
 @ExecuteOn(TaskExecutors.BLOCKING)

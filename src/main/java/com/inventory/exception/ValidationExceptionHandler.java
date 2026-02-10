@@ -9,9 +9,6 @@ import jakarta.inject.Singleton;
 /**
  * Exception handler for {@link ValidationException}.
  * Returns a user-friendly 400 response with field-specific error messages.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Produces
 @Singleton

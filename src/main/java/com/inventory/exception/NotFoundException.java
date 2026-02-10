@@ -2,9 +2,6 @@ package com.inventory.exception;
 
 /**
  * Exception thrown when a requested entity is not found in the database.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 public class NotFoundException extends RuntimeException {
 

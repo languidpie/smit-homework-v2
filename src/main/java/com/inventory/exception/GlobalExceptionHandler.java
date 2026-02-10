@@ -9,9 +9,6 @@ import jakarta.inject.Singleton;
 /**
  * Exception handler for {@link NotFoundException}.
  * Returns a user-friendly 404 response when an entity is not found.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Produces
 @Singleton

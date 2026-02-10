@@ -5,9 +5,6 @@ import java.util.Map;
 /**
  * Exception thrown when service-level validation fails.
  * Contains a map of field-specific error messages.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 public class ValidationException extends RuntimeException {
 

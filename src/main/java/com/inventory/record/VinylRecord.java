@@ -15,9 +15,6 @@ import java.time.LocalDateTime;
 
 /**
  * Entity representing a vinyl record in Katrin's collection.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 @MappedEntity("vinyl_records")

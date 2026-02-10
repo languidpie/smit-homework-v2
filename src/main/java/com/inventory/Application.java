@@ -8,9 +8,6 @@ import io.swagger.v3.oas.annotations.info.Info;
 /**
  * Main application entry point for the Inventory Management System.
  * Configures OpenAPI documentation for the REST API.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @OpenAPIDefinition(
         info = @Info(

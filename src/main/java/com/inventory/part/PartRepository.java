@@ -11,9 +11,6 @@ import java.util.List;
 /**
  * Repository interface for {@link Part} entity.
  * Provides CRUD operations and custom query methods.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @JdbcRepository(dialect = Dialect.POSTGRES)
 public interface PartRepository extends CrudRepository<Part, Long> {

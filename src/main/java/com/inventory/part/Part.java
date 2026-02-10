@@ -12,9 +12,6 @@ import java.time.LocalDateTime;
 
 /**
  * Entity representing a bicycle part in Mart's inventory.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 @Serdeable
 @MappedEntity("parts")

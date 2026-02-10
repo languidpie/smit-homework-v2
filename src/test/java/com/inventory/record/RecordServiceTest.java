@@ -3,9 +3,6 @@ package com.inventory.record;
 /**
  * Unit tests for {@link RecordService}.
  * Tests business logic for vinyl records using Mockito for repository mocking.
- *
- * @author Mari-Liis
- * Date: 04.02.2026
  */
 
 import com.inventory.exception.NotFoundException;
