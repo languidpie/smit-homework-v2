@@ -20,8 +20,8 @@ public class AuthenticationProviderUserPassword<B> implements HttpRequestAuthent
 
     // Passwords hashed with BCrypt (mart123, katrin123)
     private static final Map<String, UserCredentials> USERS = Map.of(
-            "mart", new UserCredentials("$2a$12$AnBLNLp0.JrvxnnEh0IGQOFuGYrwCIIVfXCj1tg6DsoFVLTHheLhW", List.of("ROLE_PARTS")),
-            "katrin", new UserCredentials("$2a$12$2l6BOapDlZcMruaGQfVFeOM.pfICYR9MZ7Kz91KBSdSZnq55DT52S", List.of("ROLE_RECORDS"))
+            "mart", new UserCredentials("$2a$12$AnBLNLp0.JrvxnnEh0IGQOFuGYrwCIIVfXCj1tg6DsoFVLTHheLhW", List.of(Roles.ROLE_PARTS)),
+            "katrin", new UserCredentials("$2a$12$2l6BOapDlZcMruaGQfVFeOM.pfICYR9MZ7Kz91KBSdSZnq55DT52S", List.of(Roles.ROLE_RECORDS))
     );
 
     @Override

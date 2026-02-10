@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.micronaut.security.annotation.Secured;
 
+import ee.smit.inventory.security.Roles;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.Set;
 @Controller("/api/records")
 @ExecuteOn(TaskExecutors.BLOCKING)
 @Validated
-@Secured({"ROLE_RECORDS"})
+@Secured({Roles.ROLE_RECORDS})
 @Tag(name = "Vinyl Records", description = "Manage Katrin's vinyl record collection")
 public class RecordController {
 
