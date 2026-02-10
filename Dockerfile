@@ -9,6 +9,7 @@ COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 COPY gradle.properties .
+COPY openapi.properties .
 
 # Make gradlew executable
 RUN chmod +x gradlew
