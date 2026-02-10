@@ -29,12 +29,14 @@ public class PartService {
     public Part create(PartCreateRequest request) {
         Part part = new Part();
         part.setName(request.name().trim());
-        part.setDescription(request.description() != null ? request.description().trim() : "");
+        part.setDescription(request.description() != null && !request.description().trim().isEmpty()
+                ? request.description().trim() : null);
         part.setType(request.type());
         part.setLocation(request.location().trim());
         part.setQuantity(request.quantity());
         part.setCondition(request.condition());
-        part.setNotes(request.notes() != null ? request.notes().trim() : "");
+        part.setNotes(request.notes() != null && !request.notes().trim().isEmpty()
+                ? request.notes().trim() : null);
         part.setCreatedAt(LocalDateTime.now());
         part.setUpdatedAt(LocalDateTime.now());
 
@@ -70,7 +72,7 @@ public class PartService {
             part.setName(request.name().trim());
         }
         if (request.description() != null) {
-            part.setDescription(request.description().trim());
+            part.setDescription(request.description().trim().isEmpty() ? null : request.description().trim());
         }
         if (request.type() != null) {
             part.setType(request.type());
@@ -85,7 +87,7 @@ public class PartService {
             part.setCondition(request.condition());
         }
         if (request.notes() != null) {
-            part.setNotes(request.notes().trim());
+            part.setNotes(request.notes().trim().isEmpty() ? null : request.notes().trim());
         }
         part.setUpdatedAt(LocalDateTime.now());
 
@@ -94,10 +96,9 @@ public class PartService {
 
     @Transactional
     public void delete(Long id) {
-        if (!partRepository.existsById(id)) {
-            throw new NotFoundException("Part", id);
-        }
-        partRepository.deleteById(id);
+        Part part = partRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Part", id));
+        partRepository.delete(part);
     }
 
     public long countByType(PartType type) {

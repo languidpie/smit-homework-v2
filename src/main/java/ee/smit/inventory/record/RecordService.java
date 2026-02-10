@@ -82,7 +82,7 @@ public class RecordService {
             record.setGenre(request.genre());
         }
         if (request.purchaseSource() != null) {
-            record.setPurchaseSource(request.purchaseSource().trim());
+            record.setPurchaseSource(request.purchaseSource().trim().isEmpty() ? null : request.purchaseSource().trim());
         }
         if (request.purchaseDate() != null) {
             record.setPurchaseDate(request.purchaseDate());
@@ -91,7 +91,7 @@ public class RecordService {
             record.setCondition(request.condition());
         }
         if (request.notes() != null) {
-            record.setNotes(request.notes().trim());
+            record.setNotes(request.notes().trim().isEmpty() ? null : request.notes().trim());
         }
         record.setUpdatedAt(LocalDateTime.now());
 
@@ -100,10 +100,9 @@ public class RecordService {
 
     @Transactional
     public void delete(Long id) {
-        if (!recordRepository.existsById(id)) {
-            throw new NotFoundException("VinylRecord", id);
-        }
-        recordRepository.deleteById(id);
+        VinylRecord record = recordRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("VinylRecord", id));
+        recordRepository.delete(record);
     }
 
     public long countByGenre(Genre genre) {

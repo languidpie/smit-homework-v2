@@ -120,19 +120,20 @@ class PartServiceTest {
     @Test
     void should_delete_part() {
         // given
-        given(partRepository.existsById(1L)).willReturn(true);
+        Part part = createTestPart(1L, "Test Part");
+        given(partRepository.findById(1L)).willReturn(Optional.of(part));
 
         // when
         partService.delete(1L);
 
         // then
-        verify(partRepository).deleteById(1L);
+        verify(partRepository).delete(part);
     }
 
     @Test
     void should_throw_exception_when_deleting_non_existent_part() {
         // given
-        given(partRepository.existsById(999L)).willReturn(false);
+        given(partRepository.findById(999L)).willReturn(Optional.empty());
 
         // when
         Throwable throwable = catchThrowable(() -> partService.delete(999L));

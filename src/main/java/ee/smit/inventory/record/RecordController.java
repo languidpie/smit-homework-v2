@@ -48,7 +48,6 @@ public class RecordController {
     }
 
     @Post
-    @Status(HttpStatus.CREATED)
     @Operation(summary = "Create a new record", description = "Add a new vinyl record to the collection")
     @ApiResponse(responseCode = "201", description = "Record created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
@@ -80,6 +79,12 @@ public class RecordController {
             @Parameter(description = "Page size") @QueryValue(defaultValue = "20") int size,
             @Parameter(description = "Sort field") @Nullable @QueryValue String sort,
             @Parameter(description = "Sort direction (ASC or DESC)") @Nullable @QueryValue String direction) {
+        if (page < 0) {
+            throw new ValidationException("page", "Page number must be non-negative");
+        }
+        if (size < 1 || size > 100) {
+            throw new ValidationException("size", "Page size must be between 1 and 100");
+        }
         if (sort != null && !SORTABLE_FIELDS.contains(sort)) {
             throw new ValidationException("sort", "Invalid sort field: " + sort);
         }
@@ -90,7 +95,7 @@ public class RecordController {
                     : Sort.Order.asc(sort);
             pageable = Pageable.from(page, size, Sort.of(order));
         } else {
-            pageable = Pageable.from(page, size);
+            pageable = Pageable.from(page, size, Sort.of(Sort.Order.asc("id")));
         }
         return PageResponse.from(recordService.findAll(pageable), RecordResponse::fromEntity);
     }

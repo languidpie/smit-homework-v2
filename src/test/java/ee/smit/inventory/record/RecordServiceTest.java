@@ -122,19 +122,20 @@ class RecordServiceTest {
     @Test
     void should_delete_record() {
         // given
-        given(recordRepository.existsById(1L)).willReturn(true);
+        VinylRecord record = createTestRecord(1L, "Test Record");
+        given(recordRepository.findById(1L)).willReturn(Optional.of(record));
 
         // when
         recordService.delete(1L);
 
         // then
-        verify(recordRepository).deleteById(1L);
+        verify(recordRepository).delete(record);
     }
 
     @Test
     void should_throw_exception_when_deleting_non_existent_record() {
         // given
-        given(recordRepository.existsById(999L)).willReturn(false);
+        given(recordRepository.findById(999L)).willReturn(Optional.empty());
 
         // when
         Throwable throwable = catchThrowable(() -> recordService.delete(999L));
