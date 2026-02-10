@@ -24,12 +24,17 @@ micronaut:
           exposed-headers:
             - Authorization
   security:
+    authentication: bearer
     intercept-url-map:
       - pattern: /health
         http-method: GET
         access:
           - isAnonymous()
       - pattern: /swagger/**
+        access:
+          - isAnonymous()
+      - pattern: /login
+        http-method: POST
         access:
           - isAnonymous()
       - pattern: /api/auth/**
@@ -41,6 +46,13 @@ micronaut:
       - pattern: /api/records/**
         access:
           - ROLE_RECORDS
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: '${JWT_SECRET:cGxlYXNlQ2hhbmdlVGhpc1NlY3JldEZvclByb2R1Y3Rpb25Vc2Ux}'
+              jws-algorithm: HS256
   router:
     static-resources:
       swagger:

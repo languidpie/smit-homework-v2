@@ -14,10 +14,13 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.micronaut.security.token.render.BearerAccessRefreshToken;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -40,6 +43,7 @@ class PartControllerTest {
     @Test
     void should_create_part() {
         // given
+        String token = loginAndGetToken("mart", "mart123");
         PartCreateRequest request = new PartCreateRequest(
                 "Test Brake",
                 "High quality brake",
@@ -52,7 +56,7 @@ class PartControllerTest {
 
         // when
         HttpResponse<PartResponse> response = client.toBlocking()
-                .exchange(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), PartResponse.class);
+                .exchange(HttpRequest.POST("/api/parts", request).bearerAuth(token), PartResponse.class);
 
         // then
         assertThat(response.status().getCode()).isEqualTo(HttpStatus.CREATED.getCode());
@@ -65,11 +69,12 @@ class PartControllerTest {
     @Test
     void should_get_part_by_id() {
         // given
-        Long partId = createTestPartAndGetId();
+        String token = loginAndGetToken("mart", "mart123");
+        Long partId = createTestPartAndGetId(token);
 
         // when
         PartResponse response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/parts/" + partId).basicAuth("mart", "mart123"), PartResponse.class);
+                .retrieve(HttpRequest.GET("/api/parts/" + partId).bearerAuth(token), PartResponse.class);
 
         // then
         assertThat(response.id()).isEqualTo(partId);
@@ -79,11 +84,12 @@ class PartControllerTest {
     @Test
     void should_return_404_for_non_existent_part() {
         // given
+        String token = loginAndGetToken("mart", "mart123");
         Long nonExistentId = 9999L;
 
         // when
         Throwable throwable = catchThrowable(() ->
-                client.toBlocking().retrieve(HttpRequest.GET("/api/parts/" + nonExistentId).basicAuth("mart", "mart123"), PartResponse.class));
+                client.toBlocking().retrieve(HttpRequest.GET("/api/parts/" + nonExistentId).bearerAuth(token), PartResponse.class));
 
         // then
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -94,7 +100,8 @@ class PartControllerTest {
     @Test
     void should_update_part() {
         // given
-        Long partId = createTestPartAndGetId();
+        String token = loginAndGetToken("mart", "mart123");
+        Long partId = createTestPartAndGetId(token);
         PartUpdateRequest updateRequest = new PartUpdateRequest(
                 "Updated Name",
                 null, null, null, null, null, null
@@ -102,7 +109,7 @@ class PartControllerTest {
 
         // when
         PartResponse response = client.toBlocking()
-                .retrieve(HttpRequest.PUT("/api/parts/" + partId, updateRequest).basicAuth("mart", "mart123"), PartResponse.class);
+                .retrieve(HttpRequest.PUT("/api/parts/" + partId, updateRequest).bearerAuth(token), PartResponse.class);
 
         // then
         assertThat(response.name()).isEqualTo("Updated Name");
@@ -111,29 +118,31 @@ class PartControllerTest {
     @Test
     void should_delete_part() {
         // given
-        Long partId = createTestPartAndGetId();
+        String token = loginAndGetToken("mart", "mart123");
+        Long partId = createTestPartAndGetId(token);
 
         // when
         HttpResponse<?> response = client.toBlocking()
-                .exchange(HttpRequest.DELETE("/api/parts/" + partId).basicAuth("mart", "mart123"));
+                .exchange(HttpRequest.DELETE("/api/parts/" + partId).bearerAuth(token));
 
         // then
         assertThat(response.status().getCode()).isEqualTo(HttpStatus.NO_CONTENT.getCode());
         Throwable throwable = catchThrowable(() ->
-                client.toBlocking().retrieve(HttpRequest.GET("/api/parts/" + partId).basicAuth("mart", "mart123"), PartResponse.class));
+                client.toBlocking().retrieve(HttpRequest.GET("/api/parts/" + partId).bearerAuth(token), PartResponse.class));
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
     }
 
     @Test
     void should_filter_by_type() {
         // given
-        createTestPartWithType("Brake 1", PartType.BRAKE);
-        createTestPartWithType("Brake 2", PartType.BRAKE);
-        createTestPartWithType("Tire 1", PartType.TIRE);
+        String token = loginAndGetToken("mart", "mart123");
+        createTestPartWithType("Brake 1", PartType.BRAKE, token);
+        createTestPartWithType("Brake 2", PartType.BRAKE, token);
+        createTestPartWithType("Tire 1", PartType.TIRE, token);
 
         // when
         PartResponse[] response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/parts/type/BRAKE").basicAuth("mart", "mart123"), PartResponse[].class);
+                .retrieve(HttpRequest.GET("/api/parts/type/BRAKE").bearerAuth(token), PartResponse[].class);
 
         // then
         assertThat(response).hasSize(2);
@@ -143,19 +152,20 @@ class PartControllerTest {
     @Test
     void should_search_by_name() {
         // given
-        createTestPartWithType("Shimano Brake", PartType.BRAKE);
-        createTestPartWithType("SRAM Brake", PartType.BRAKE);
+        String token = loginAndGetToken("mart", "mart123");
+        createTestPartWithType("Shimano Brake", PartType.BRAKE, token);
+        createTestPartWithType("SRAM Brake", PartType.BRAKE, token);
 
         // when
         PartResponse[] response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/parts/search?q=shimano").basicAuth("mart", "mart123"), PartResponse[].class);
+                .retrieve(HttpRequest.GET("/api/parts/search?q=shimano").bearerAuth(token), PartResponse[].class);
 
         // then
         assertThat(response).hasSize(1);
         assertThat(response[0].name()).contains("Shimano");
     }
 
-    private Long createTestPartAndGetId() {
+    private Long createTestPartAndGetId(String token) {
         PartCreateRequest request = new PartCreateRequest(
                 "Test Part",
                 "Test description",
@@ -167,11 +177,11 @@ class PartControllerTest {
         );
 
         PartResponse response = client.toBlocking()
-                .retrieve(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), PartResponse.class);
+                .retrieve(HttpRequest.POST("/api/parts", request).bearerAuth(token), PartResponse.class);
         return response.id();
     }
 
-    private void createTestPartWithType(String name, PartType type) {
+    private void createTestPartWithType(String name, PartType type, String token) {
         PartCreateRequest request = new PartCreateRequest(
                 name,
                 "Test description",
@@ -182,6 +192,13 @@ class PartControllerTest {
                 null
         );
 
-        client.toBlocking().exchange(HttpRequest.POST("/api/parts", request).basicAuth("mart", "mart123"), PartResponse.class);
+        client.toBlocking().exchange(HttpRequest.POST("/api/parts", request).bearerAuth(token), PartResponse.class);
+    }
+
+    private String loginAndGetToken(String username, String password) {
+        HttpResponse<BearerAccessRefreshToken> response = client.toBlocking()
+                .exchange(HttpRequest.POST("/login", Map.of("username", username, "password", password)),
+                        BearerAccessRefreshToken.class);
+        return response.body().getAccessToken();
     }
 }

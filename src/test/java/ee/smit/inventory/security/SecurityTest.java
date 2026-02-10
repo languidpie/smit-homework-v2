@@ -1,13 +1,17 @@
 package ee.smit.inventory.security;
 
 import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.micronaut.security.token.render.BearerAccessRefreshToken;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -41,17 +45,21 @@ class SecurityTest {
 
     @Test
     void should_allow_mart_to_access_parts() {
+        String token = loginAndGetToken("mart", "mart123");
+
         String response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/parts").basicAuth("mart", "mart123"));
+                .retrieve(HttpRequest.GET("/api/parts").bearerAuth(token));
 
         assertThat(response).isNotNull();
     }
 
     @Test
     void should_deny_mart_access_to_records() {
+        String token = loginAndGetToken("mart", "mart123");
+
         Throwable throwable = catchThrowable(() ->
                 client.toBlocking().retrieve(
-                        HttpRequest.GET("/api/records").basicAuth("mart", "mart123")));
+                        HttpRequest.GET("/api/records").bearerAuth(token)));
 
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
         HttpClientResponseException e = (HttpClientResponseException) throwable;
@@ -60,17 +68,21 @@ class SecurityTest {
 
     @Test
     void should_allow_katrin_to_access_records() {
+        String token = loginAndGetToken("katrin", "katrin123");
+
         String response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/records").basicAuth("katrin", "katrin123"));
+                .retrieve(HttpRequest.GET("/api/records").bearerAuth(token));
 
         assertThat(response).isNotNull();
     }
 
     @Test
     void should_deny_katrin_access_to_parts() {
+        String token = loginAndGetToken("katrin", "katrin123");
+
         Throwable throwable = catchThrowable(() ->
                 client.toBlocking().retrieve(
-                        HttpRequest.GET("/api/parts").basicAuth("katrin", "katrin123")));
+                        HttpRequest.GET("/api/parts").bearerAuth(token)));
 
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
         HttpClientResponseException e = (HttpClientResponseException) throwable;
@@ -80,8 +92,9 @@ class SecurityTest {
     @Test
     void should_return_401_for_wrong_password() {
         Throwable throwable = catchThrowable(() ->
-                client.toBlocking().retrieve(
-                        HttpRequest.GET("/api/parts").basicAuth("mart", "wrongpassword")));
+                client.toBlocking().exchange(
+                        HttpRequest.POST("/login", Map.of("username", "mart", "password", "wrongpassword")),
+                        BearerAccessRefreshToken.class));
 
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
         HttpClientResponseException e = (HttpClientResponseException) throwable;
@@ -90,8 +103,10 @@ class SecurityTest {
 
     @Test
     void should_return_user_info_for_authenticated_user() {
+        String token = loginAndGetToken("mart", "mart123");
+
         AuthController.UserInfo response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/auth/me").basicAuth("mart", "mart123"),
+                .retrieve(HttpRequest.GET("/api/auth/me").bearerAuth(token),
                         AuthController.UserInfo.class);
 
         assertThat(response.username()).isEqualTo("mart");
@@ -103,5 +118,12 @@ class SecurityTest {
         String response = client.toBlocking().retrieve(HttpRequest.GET("/health"));
 
         assertThat(response).contains("UP");
+    }
+
+    private String loginAndGetToken(String username, String password) {
+        HttpResponse<BearerAccessRefreshToken> response = client.toBlocking()
+                .exchange(HttpRequest.POST("/login", Map.of("username", username, "password", password)),
+                        BearerAccessRefreshToken.class);
+        return response.body().getAccessToken();
     }
 }

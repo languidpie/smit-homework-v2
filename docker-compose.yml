@@ -27,6 +27,7 @@ services:
       DB_NAME: inventory
       DB_USER: inventory
       DB_PASSWORD: inventory
+      JWT_SECRET: cGxlYXNlQ2hhbmdlVGhpc1NlY3JldEZvclByb2R1Y3Rpb25Vc2Ux
     ports:
       - "8080:8080"
     depends_on:

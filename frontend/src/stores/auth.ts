@@ -14,27 +14,39 @@ export const useAuthStore = defineStore('auth', () => {
   const canAccessRecords = computed(() => user.value?.role === 'ROLE_RECORDS')
 
   function getAuthHeader(): string | null {
-    return credentials.value ? `Basic ${credentials.value}` : null
+    return credentials.value ? `Bearer ${credentials.value}` : null
   }
 
   async function login(loginCredentials: LoginCredentials): Promise<boolean> {
-    const token = btoa(`${loginCredentials.username}:${loginCredentials.password}`)
-
     try {
-      const response = await fetch('/api/auth/me', {
-        headers: {
-          Authorization: `Basic ${token}`
-        }
+      const loginResponse = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: loginCredentials.username,
+          password: loginCredentials.password
+        })
       })
 
-      if (!response.ok) {
+      if (!loginResponse.ok) {
         return false
       }
 
-      const userInfo: User = await response.json()
+      const tokenData = await loginResponse.json()
+      const accessToken = tokenData.access_token
+
+      const meResponse = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+
+      if (!meResponse.ok) {
+        return false
+      }
+
+      const userInfo: User = await meResponse.json()
       user.value = userInfo
-      credentials.value = token
-      sessionStorage.setItem(AUTH_STORAGE_KEY, token)
+      credentials.value = accessToken
+      sessionStorage.setItem(AUTH_STORAGE_KEY, accessToken)
       return true
     } catch {
       return false
@@ -57,7 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await fetch('/api/auth/me', {
         headers: {
-          Authorization: `Basic ${storedToken}`
+          Authorization: `Bearer ${storedToken}`
         }
       })
 

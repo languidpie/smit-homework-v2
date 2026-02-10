@@ -14,12 +14,14 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.micronaut.security.token.render.BearerAccessRefreshToken;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -42,6 +44,7 @@ class RecordControllerTest {
     @Test
     void should_create_record() {
         // given
+        String token = loginAndGetToken("katrin", "katrin123");
         RecordCreateRequest request = new RecordCreateRequest(
                 "Abbey Road",
                 "The Beatles",
@@ -55,7 +58,7 @@ class RecordControllerTest {
 
         // when
         HttpResponse<RecordResponse> response = client.toBlocking()
-                .exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
+                .exchange(HttpRequest.POST("/api/records", request).bearerAuth(token), RecordResponse.class);
 
         // then
         assertThat(response.status().getCode()).isEqualTo(HttpStatus.CREATED.getCode());
@@ -68,11 +71,12 @@ class RecordControllerTest {
     @Test
     void should_get_record_by_id() {
         // given
-        Long recordId = createTestRecordAndGetId();
+        String token = loginAndGetToken("katrin", "katrin123");
+        Long recordId = createTestRecordAndGetId(token);
 
         // when
         RecordResponse response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/records/" + recordId).basicAuth("katrin", "katrin123"), RecordResponse.class);
+                .retrieve(HttpRequest.GET("/api/records/" + recordId).bearerAuth(token), RecordResponse.class);
 
         // then
         assertThat(response.id()).isEqualTo(recordId);
@@ -82,11 +86,12 @@ class RecordControllerTest {
     @Test
     void should_return_404_for_non_existent_record() {
         // given
+        String token = loginAndGetToken("katrin", "katrin123");
         Long nonExistentId = 9999L;
 
         // when
         Throwable throwable = catchThrowable(() ->
-                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + nonExistentId).basicAuth("katrin", "katrin123"), RecordResponse.class));
+                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + nonExistentId).bearerAuth(token), RecordResponse.class));
 
         // then
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
@@ -97,7 +102,8 @@ class RecordControllerTest {
     @Test
     void should_update_record() {
         // given
-        Long recordId = createTestRecordAndGetId();
+        String token = loginAndGetToken("katrin", "katrin123");
+        Long recordId = createTestRecordAndGetId(token);
         RecordUpdateRequest updateRequest = new RecordUpdateRequest(
                 "Updated Title",
                 null, null, null, null, null, null, null
@@ -105,7 +111,7 @@ class RecordControllerTest {
 
         // when
         RecordResponse response = client.toBlocking()
-                .retrieve(HttpRequest.PUT("/api/records/" + recordId, updateRequest).basicAuth("katrin", "katrin123"), RecordResponse.class);
+                .retrieve(HttpRequest.PUT("/api/records/" + recordId, updateRequest).bearerAuth(token), RecordResponse.class);
 
         // then
         assertThat(response.title()).isEqualTo("Updated Title");
@@ -114,29 +120,31 @@ class RecordControllerTest {
     @Test
     void should_delete_record() {
         // given
-        Long recordId = createTestRecordAndGetId();
+        String token = loginAndGetToken("katrin", "katrin123");
+        Long recordId = createTestRecordAndGetId(token);
 
         // when
         HttpResponse<?> response = client.toBlocking()
-                .exchange(HttpRequest.DELETE("/api/records/" + recordId).basicAuth("katrin", "katrin123"));
+                .exchange(HttpRequest.DELETE("/api/records/" + recordId).bearerAuth(token));
 
         // then
         assertThat(response.status().getCode()).isEqualTo(HttpStatus.NO_CONTENT.getCode());
         Throwable throwable = catchThrowable(() ->
-                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + recordId).basicAuth("katrin", "katrin123"), RecordResponse.class));
+                client.toBlocking().retrieve(HttpRequest.GET("/api/records/" + recordId).bearerAuth(token), RecordResponse.class));
         assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
     }
 
     @Test
     void should_filter_by_genre() {
         // given
-        createTestRecordWithGenre("Rock Album 1", Genre.ROCK);
-        createTestRecordWithGenre("Rock Album 2", Genre.ROCK);
-        createTestRecordWithGenre("Jazz Album", Genre.JAZZ);
+        String token = loginAndGetToken("katrin", "katrin123");
+        createTestRecordWithGenre("Rock Album 1", Genre.ROCK, token);
+        createTestRecordWithGenre("Rock Album 2", Genre.ROCK, token);
+        createTestRecordWithGenre("Jazz Album", Genre.JAZZ, token);
 
         // when
         RecordResponse[] response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/records/genre/ROCK").basicAuth("katrin", "katrin123"), RecordResponse[].class);
+                .retrieve(HttpRequest.GET("/api/records/genre/ROCK").bearerAuth(token), RecordResponse[].class);
 
         // then
         assertThat(response).hasSize(2);
@@ -146,19 +154,20 @@ class RecordControllerTest {
     @Test
     void should_search_by_title_or_artist() {
         // given
-        createTestRecordWithArtist("Abbey Road", "The Beatles");
-        createTestRecordWithArtist("Let It Be", "The Beatles");
-        createTestRecordWithArtist("Dark Side", "Pink Floyd");
+        String token = loginAndGetToken("katrin", "katrin123");
+        createTestRecordWithArtist("Abbey Road", "The Beatles", token);
+        createTestRecordWithArtist("Let It Be", "The Beatles", token);
+        createTestRecordWithArtist("Dark Side", "Pink Floyd", token);
 
         // when
         RecordResponse[] response = client.toBlocking()
-                .retrieve(HttpRequest.GET("/api/records/search?q=beatles").basicAuth("katrin", "katrin123"), RecordResponse[].class);
+                .retrieve(HttpRequest.GET("/api/records/search?q=beatles").bearerAuth(token), RecordResponse[].class);
 
         // then
         assertThat(response).hasSize(2);
     }
 
-    private Long createTestRecordAndGetId() {
+    private Long createTestRecordAndGetId(String token) {
         RecordCreateRequest request = new RecordCreateRequest(
                 "Test Album",
                 "Test Artist",
@@ -171,11 +180,11 @@ class RecordControllerTest {
         );
 
         RecordResponse response = client.toBlocking()
-                .retrieve(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
+                .retrieve(HttpRequest.POST("/api/records", request).bearerAuth(token), RecordResponse.class);
         return response.id();
     }
 
-    private void createTestRecordWithGenre(String title, Genre genre) {
+    private void createTestRecordWithGenre(String title, Genre genre, String token) {
         RecordCreateRequest request = new RecordCreateRequest(
                 title,
                 "Test Artist",
@@ -187,10 +196,10 @@ class RecordControllerTest {
                 null
         );
 
-        client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
+        client.toBlocking().exchange(HttpRequest.POST("/api/records", request).bearerAuth(token), RecordResponse.class);
     }
 
-    private void createTestRecordWithArtist(String title, String artist) {
+    private void createTestRecordWithArtist(String title, String artist, String token) {
         RecordCreateRequest request = new RecordCreateRequest(
                 title,
                 artist,
@@ -202,6 +211,13 @@ class RecordControllerTest {
                 null
         );
 
-        client.toBlocking().exchange(HttpRequest.POST("/api/records", request).basicAuth("katrin", "katrin123"), RecordResponse.class);
+        client.toBlocking().exchange(HttpRequest.POST("/api/records", request).bearerAuth(token), RecordResponse.class);
+    }
+
+    private String loginAndGetToken(String username, String password) {
+        HttpResponse<BearerAccessRefreshToken> response = client.toBlocking()
+                .exchange(HttpRequest.POST("/login", Map.of("username", username, "password", password)),
+                        BearerAccessRefreshToken.class);
+        return response.body().getAccessToken();
     }
 }
