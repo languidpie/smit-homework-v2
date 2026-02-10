@@ -8,6 +8,7 @@ import { ApiException } from '@/api/client'
 export const usePartsStore = defineStore('parts', () => {
   const parts = ref<Part[]>([])
   const searchResults = ref<Part[]>([])
+  const typeFilterResults = ref<Part[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const selectedType = ref<PartType | null>(null)
@@ -24,24 +25,22 @@ export const usePartsStore = defineStore('parts', () => {
   const sortDirection = ref<SortDirection>('ASC')
 
   const filteredParts = computed(() => {
-    const source = searchQuery.value ? searchResults.value : parts.value
-
-    if (selectedType.value) {
-      return source.filter(p => p.type === selectedType.value)
+    if (searchQuery.value) {
+      const source = searchResults.value
+      if (selectedType.value) {
+        return source.filter(p => p.type === selectedType.value)
+      }
+      return source
     }
-
-    return source
+    if (selectedType.value) {
+      return typeFilterResults.value
+    }
+    return parts.value
   })
 
   const totalParts = computed(() => totalElements.value)
 
-  const partsByType = computed(() => {
-    const counts: Record<string, number> = {}
-    parts.value.forEach(p => {
-      counts[p.type] = (counts[p.type] || 0) + 1
-    })
-    return counts
-  })
+  const isPaginated = computed(() => !searchQuery.value && !selectedType.value)
 
   const hasPreviousPage = computed(() => currentPage.value > 0)
   const hasNextPage = computed(() => currentPage.value < totalPages.value - 1)
@@ -82,6 +81,24 @@ export const usePartsStore = defineStore('parts', () => {
   async function previousPage() {
     if (hasPreviousPage.value) {
       await fetchAll(currentPage.value - 1)
+    }
+  }
+
+  async function fetchByType(type: PartType) {
+    isLoading.value = true
+    error.value = null
+    try {
+      typeFilterResults.value = await partsApi.getByType(type)
+    } catch (e) {
+      if (e instanceof ApiException) {
+        error.value = e.userMessage
+      } else if (e instanceof Error) {
+        error.value = `Failed to load parts: ${e.message}`
+      } else {
+        error.value = 'Failed to load parts. Please check your connection and try again.'
+      }
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -137,6 +154,8 @@ export const usePartsStore = defineStore('parts', () => {
       await partsApi.delete(id)
       if (searchQuery.value) {
         await searchServer(searchQuery.value)
+      } else if (selectedType.value) {
+        await fetchByType(selectedType.value)
       } else {
         await fetchAll(currentPage.value)
       }
@@ -150,6 +169,13 @@ export const usePartsStore = defineStore('parts', () => {
 
   function setTypeFilter(type: PartType | null) {
     selectedType.value = type
+    if (!searchQuery.value) {
+      if (type) {
+        fetchByType(type)
+      } else {
+        fetchAll(0)
+      }
+    }
   }
 
   function setSearchQuery(query: string) {
@@ -187,7 +213,7 @@ export const usePartsStore = defineStore('parts', () => {
     searchQuery,
     filteredParts,
     totalParts,
-    partsByType,
+    isPaginated,
     currentPage,
     totalPages,
     hasPreviousPage,

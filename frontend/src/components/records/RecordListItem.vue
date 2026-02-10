@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import type { VinylRecord } from '@/types/record'
+import { getRecordConditionColor } from '@/utils/condition-colors'
 
 const props = defineProps<{
   record: VinylRecord
@@ -13,21 +14,10 @@ const emit = defineEmits<{
 
 const expanded = ref(false)
 
-const conditionColor = computed(() => {
-  const colors: Record<string, string> = {
-    MINT: 'badge-green',
-    NEAR_MINT: 'bg-emerald-100 text-emerald-800',
-    EXCELLENT: 'badge-blue',
-    VERY_GOOD: 'bg-purple-100 text-purple-800',
-    GOOD: 'badge-yellow',
-    FAIR: 'bg-orange-100 text-orange-800',
-    POOR: 'badge-red'
-  }
-  return colors[props.record.condition] || 'badge-gray'
-})
+const conditionColor = computed(() => getRecordConditionColor(props.record.condition))
 
 const genreLabel = computed(() => {
-  return props.record.genre.replace('_', ' ')
+  return props.record.genre.replaceAll('_', ' ')
 })
 </script>
 

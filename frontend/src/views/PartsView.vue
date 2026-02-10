@@ -19,6 +19,8 @@ const debouncedSearch = debounce((query: string) => {
   store.setSearchQuery(query)
   if (query) {
     store.searchServer(query)
+  } else if (store.selectedType) {
+    store.setTypeFilter(store.selectedType)
   } else {
     store.fetchAll()
   }
@@ -208,7 +210,7 @@ function handleSort(field: string) {
       </div>
 
       <!-- Pagination controls -->
-      <div v-if="store.totalPages > 1" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+      <div v-if="store.isPaginated && store.totalPages > 1" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
         <div class="text-sm text-gray-700">
           Page {{ store.currentPage + 1 }} of {{ store.totalPages }}
           <span class="ml-2 text-gray-500">({{ store.totalParts }} total items)</span>

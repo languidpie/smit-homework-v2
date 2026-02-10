@@ -61,11 +61,16 @@ describe('Parts Store', () => {
     expect(store.totalParts).toBe(2)
   })
 
-  it('filters parts by type', async () => {
-    const store = usePartsStore()
-    store.parts = mockParts
+  it('filters parts by type via server', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([mockParts[0]])
+    } as Response)
 
+    const store = usePartsStore()
     store.setTypeFilter('BRAKE')
+
+    await new Promise(resolve => setTimeout(resolve))
 
     expect(store.filteredParts).toHaveLength(1)
     expect(store.filteredParts[0].type).toBe('BRAKE')
@@ -83,16 +88,6 @@ describe('Parts Store', () => {
 
     expect(store.filteredParts).toHaveLength(1)
     expect(store.filteredParts[0].name).toContain('Shimano')
-  })
-
-  it('counts parts by type', () => {
-    const store = usePartsStore()
-    store.parts = mockParts
-
-    expect(store.partsByType).toEqual({
-      BRAKE: 1,
-      FRAME: 1
-    })
   })
 
   it('gets part by id', () => {

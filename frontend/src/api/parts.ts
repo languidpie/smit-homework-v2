@@ -10,6 +10,14 @@ export const partsApi = {
     return apiGet<Page<Part>>(url)
   },
 
+  getById(id: number): Promise<Part> {
+    return apiGet<Part>(`/parts/${id}`)
+  },
+
+  getByType(type: string): Promise<Part[]> {
+    return apiGet<Part[]>(`/parts/type/${type}`)
+  },
+
   search(query: string): Promise<Part[]> {
     return apiGet<Part[]>(`/parts/search?q=${encodeURIComponent(query)}`)
   },

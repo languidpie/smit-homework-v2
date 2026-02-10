@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import type { Part } from '@/types/part'
+import { getPartConditionColor } from '@/utils/condition-colors'
 
 const props = defineProps<{
   part: Part
@@ -13,16 +14,7 @@ const emit = defineEmits<{
 
 const expanded = ref(false)
 
-const conditionColor = computed(() => {
-  const colors: Record<string, string> = {
-    NEW: 'badge-green',
-    EXCELLENT: 'badge-blue',
-    GOOD: 'badge-yellow',
-    FAIR: 'bg-orange-100 text-orange-800',
-    POOR: 'badge-red'
-  }
-  return colors[props.part.condition] || 'badge-gray'
-})
+const conditionColor = computed(() => getPartConditionColor(props.part.condition))
 
 const typeIcon = computed(() => {
   const icons: Record<string, string> = {

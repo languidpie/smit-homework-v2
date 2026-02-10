@@ -8,6 +8,7 @@ import { ApiException } from '@/api/client'
 export const useRecordsStore = defineStore('records', () => {
   const records = ref<VinylRecord[]>([])
   const searchResults = ref<VinylRecord[]>([])
+  const genreFilterResults = ref<VinylRecord[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const selectedGenre = ref<Genre | null>(null)
@@ -24,24 +25,22 @@ export const useRecordsStore = defineStore('records', () => {
   const sortDirection = ref<SortDirection>('ASC')
 
   const filteredRecords = computed(() => {
-    const source = searchQuery.value ? searchResults.value : records.value
-
-    if (selectedGenre.value) {
-      return source.filter(r => r.genre === selectedGenre.value)
+    if (searchQuery.value) {
+      const source = searchResults.value
+      if (selectedGenre.value) {
+        return source.filter(r => r.genre === selectedGenre.value)
+      }
+      return source
     }
-
-    return source
+    if (selectedGenre.value) {
+      return genreFilterResults.value
+    }
+    return records.value
   })
 
   const totalRecords = computed(() => totalElements.value)
 
-  const recordsByGenre = computed(() => {
-    const counts: Record<string, number> = {}
-    records.value.forEach(r => {
-      counts[r.genre] = (counts[r.genre] || 0) + 1
-    })
-    return counts
-  })
+  const isPaginated = computed(() => !searchQuery.value && !selectedGenre.value)
 
   const hasPreviousPage = computed(() => currentPage.value > 0)
   const hasNextPage = computed(() => currentPage.value < totalPages.value - 1)
@@ -82,6 +81,24 @@ export const useRecordsStore = defineStore('records', () => {
   async function previousPage() {
     if (hasPreviousPage.value) {
       await fetchAll(currentPage.value - 1)
+    }
+  }
+
+  async function fetchByGenre(genre: Genre) {
+    isLoading.value = true
+    error.value = null
+    try {
+      genreFilterResults.value = await recordsApi.getByGenre(genre)
+    } catch (e) {
+      if (e instanceof ApiException) {
+        error.value = e.userMessage
+      } else if (e instanceof Error) {
+        error.value = `Failed to load records: ${e.message}`
+      } else {
+        error.value = 'Failed to load records. Please check your connection and try again.'
+      }
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -137,6 +154,8 @@ export const useRecordsStore = defineStore('records', () => {
       await recordsApi.delete(id)
       if (searchQuery.value) {
         await searchServer(searchQuery.value)
+      } else if (selectedGenre.value) {
+        await fetchByGenre(selectedGenre.value)
       } else {
         await fetchAll(currentPage.value)
       }
@@ -150,6 +169,13 @@ export const useRecordsStore = defineStore('records', () => {
 
   function setGenreFilter(genre: Genre | null) {
     selectedGenre.value = genre
+    if (!searchQuery.value) {
+      if (genre) {
+        fetchByGenre(genre)
+      } else {
+        fetchAll(0)
+      }
+    }
   }
 
   function setSearchQuery(query: string) {
@@ -187,7 +213,7 @@ export const useRecordsStore = defineStore('records', () => {
     searchQuery,
     filteredRecords,
     totalRecords,
-    recordsByGenre,
+    isPaginated,
     currentPage,
     totalPages,
     hasPreviousPage,

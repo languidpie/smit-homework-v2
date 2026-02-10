@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePartsStore } from '@/stores/parts'
+import { partsApi } from '@/api/parts'
 import { PART_TYPES, PART_CONDITIONS } from '@/types/part'
 import type { PartType, PartCondition } from '@/types/part'
 import { validatePart, getErrorMessage, getValidationErrors } from '@/utils/validation'
@@ -30,9 +31,8 @@ const fieldErrors = ref<Record<string, string>>({})
 
 onMounted(async () => {
   if (isEditing.value) {
-    await store.fetchAll()
-    const part = store.getPartById(partId.value)
-    if (part) {
+    try {
+      const part = await partsApi.getById(partId.value)
       form.value = {
         name: part.name,
         description: part.description || '',
@@ -42,8 +42,12 @@ onMounted(async () => {
         condition: part.condition,
         notes: part.notes || ''
       }
-    } else {
-      error.value = 'Part not found. It may have been deleted.'
+    } catch (e) {
+      if (e instanceof ApiException && e.status === 404) {
+        error.value = 'Part not found. It may have been deleted.'
+      } else {
+        error.value = getErrorMessage(e)
+      }
     }
   }
 })
@@ -78,10 +82,16 @@ async function handleSubmit() {
   isSubmitting.value = true
 
   try {
+    const data = {
+      ...form.value,
+      description: form.value.description || undefined,
+      notes: form.value.notes || undefined
+    }
+
     if (isEditing.value) {
-      await store.updatePart(partId.value, form.value)
+      await store.updatePart(partId.value, data)
     } else {
-      await store.createPart(form.value)
+      await store.createPart(data)
     }
     router.push('/parts')
   } catch (e) {

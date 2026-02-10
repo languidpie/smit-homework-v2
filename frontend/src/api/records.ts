@@ -10,6 +10,14 @@ export const recordsApi = {
     return apiGet<Page<VinylRecord>>(url)
   },
 
+  getById(id: number): Promise<VinylRecord> {
+    return apiGet<VinylRecord>(`/records/${id}`)
+  },
+
+  getByGenre(genre: string): Promise<VinylRecord[]> {
+    return apiGet<VinylRecord[]>(`/records/genre/${genre}`)
+  },
+
   search(query: string): Promise<VinylRecord[]> {
     return apiGet<VinylRecord[]>(`/records/search?q=${encodeURIComponent(query)}`)
   },

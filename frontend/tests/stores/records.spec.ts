@@ -63,11 +63,16 @@ describe('Records Store', () => {
     expect(store.totalRecords).toBe(2)
   })
 
-  it('filters records by genre', async () => {
-    const store = useRecordsStore()
-    store.records = mockRecords
+  it('filters records by genre via server', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([mockRecords[0]])
+    } as Response)
 
+    const store = useRecordsStore()
     store.setGenreFilter('ROCK')
+
+    await new Promise(resolve => setTimeout(resolve))
 
     expect(store.filteredRecords).toHaveLength(1)
     expect(store.filteredRecords[0].genre).toBe('ROCK')
@@ -85,16 +90,6 @@ describe('Records Store', () => {
 
     expect(store.filteredRecords).toHaveLength(1)
     expect(store.filteredRecords[0].artist).toContain('Beatles')
-  })
-
-  it('counts records by genre', () => {
-    const store = useRecordsStore()
-    store.records = mockRecords
-
-    expect(store.recordsByGenre).toEqual({
-      ROCK: 1,
-      JAZZ: 1
-    })
   })
 
   it('gets record by id', () => {

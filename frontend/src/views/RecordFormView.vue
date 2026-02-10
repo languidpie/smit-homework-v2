@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecordsStore } from '@/stores/records'
+import { recordsApi } from '@/api/records'
 import { GENRES, RECORD_CONDITIONS } from '@/types/record'
 import type { Genre, RecordCondition } from '@/types/record'
 import { validateRecord, getErrorMessage, getValidationErrors } from '@/utils/validation'
@@ -32,9 +33,8 @@ const fieldErrors = ref<Record<string, string>>({})
 
 onMounted(async () => {
   if (isEditing.value) {
-    await store.fetchAll()
-    const record = store.getRecordById(recordId.value)
-    if (record) {
+    try {
+      const record = await recordsApi.getById(recordId.value)
       form.value = {
         title: record.title,
         artist: record.artist,
@@ -45,8 +45,12 @@ onMounted(async () => {
         condition: record.condition,
         notes: record.notes || ''
       }
-    } else {
-      error.value = 'Record not found. It may have been deleted.'
+    } catch (e) {
+      if (e instanceof ApiException && e.status === 404) {
+        error.value = 'Record not found. It may have been deleted.'
+      } else {
+        error.value = getErrorMessage(e)
+      }
     }
   }
 })
