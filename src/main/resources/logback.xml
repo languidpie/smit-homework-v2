@@ -10,6 +10,6 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="com.inventory" level="DEBUG"/>
+    <logger name="ee.smit.inventory" level="DEBUG"/>
     <logger name="io.micronaut.data.query" level="DEBUG"/>
 </configuration>

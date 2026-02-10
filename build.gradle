@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClass.set("com.inventory.Application")
+    mainClass.set("ee.smit.inventory.Application")
 }
 
 version = "0.1"
@@ -35,7 +35,6 @@ dependencies {
     // OpenAPI / Swagger UI
     compileOnly("io.micronaut.openapi:micronaut-openapi-annotations")
     runtimeOnly("io.swagger.core.v3:swagger-annotations")
-
 
     // Micronaut Data JDBC
     implementation("io.micronaut.data:micronaut-data-jdbc")
@@ -87,7 +86,7 @@ micronaut {
     testRuntime("junit5")
     processing {
         incremental(true)
-        annotations("com.inventory.*")
+        annotations("ee.smit.inventory.*")
     }
 }
 
