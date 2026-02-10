@@ -1,5 +1,7 @@
 # Inventory Management System
 
+> **Note:** This is a homework/demo project and is not intended for production use. Credentials and JWT secrets are hardcoded in the source code.
+
 A web application for managing two inventory collections with role-based access control:
 - **Bicycle Parts** - Mart's bike parts inventory
 - **Vinyl Records** - Katrin's record collection
@@ -12,7 +14,7 @@ A web application for managing two inventory collections with role-based access 
 - **Database:** PostgreSQL 16
 - **ORM:** Micronaut Data JDBC
 - **Migrations:** Flyway
-- **Security:** Micronaut Security (Basic Auth)
+- **Security:** Micronaut Security (JWT)
 - **API Docs:** OpenAPI / Swagger UI
 - **Build Tool:** Gradle
 
@@ -65,7 +67,7 @@ The frontend runs at **http://localhost:5173**
 
 ## Authentication
 
-The application uses Basic Auth with two predefined users:
+The application uses JWT authentication with two predefined users:
 
 | User | Password | Access |
 |------|----------|--------|
