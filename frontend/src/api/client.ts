@@ -76,13 +76,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
     try {
       const errorBody = await response.json()
-      apiError = {
-        status: response.status,
-        error: errorBody.error || response.statusText,
-        message: errorBody.message || `Request failed with status ${response.status}`,
-        path: errorBody.path,
-        timestamp: errorBody.timestamp,
-        validationErrors: errorBody._embedded?.errors?.reduce(
+
+      // Parse validation errors from either custom ErrorResponse format ({errors: {field: msg}})
+      // or Micronaut default format ({_embedded: {errors: [{path, message}]}})
+      let validationErrors: Record<string, string> | undefined
+      if (errorBody.errors && typeof errorBody.errors === 'object' && !Array.isArray(errorBody.errors)) {
+        validationErrors = errorBody.errors
+      } else if (errorBody._embedded?.errors) {
+        validationErrors = errorBody._embedded.errors.reduce(
           (acc: Record<string, string>, err: { path?: string; message: string }) => {
             if (err.path) {
               acc[err.path] = err.message
@@ -91,6 +92,15 @@ async function handleResponse<T>(response: Response): Promise<T> {
           },
           {}
         )
+      }
+
+      apiError = {
+        status: response.status,
+        error: errorBody.error || response.statusText,
+        message: errorBody.message || `Request failed with status ${response.status}`,
+        path: errorBody.path,
+        timestamp: errorBody.timestamp,
+        validationErrors
       }
     } catch {
       apiError = {

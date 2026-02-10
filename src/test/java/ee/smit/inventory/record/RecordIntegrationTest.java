@@ -356,6 +356,77 @@ class RecordIntegrationTest {
             assertThat(beatlesRecords).hasSize(4);
             assertThat(beatlesRecords).allMatch(r -> r.artist().equals("The Beatles"));
         }
+
+        @Test
+        void should_clear_nullable_fields_via_empty_string() {
+            // given
+            String token = loginAndGetToken("katrin", "katrin123");
+            RecordCreateRequest createRequest = new RecordCreateRequest(
+                    "Test Album",
+                    "Test Artist",
+                    1970,
+                    Genre.ROCK,
+                    "Local store",
+                    LocalDate.now(),
+                    RecordCondition.EXCELLENT,
+                    "Has notes"
+            );
+
+            RecordResponse created = client.toBlocking()
+                    .retrieve(HttpRequest.POST("/api/records", createRequest).bearerAuth(token), RecordResponse.class);
+            assertThat(created.purchaseSource()).isEqualTo("Local store");
+            assertThat(created.notes()).isEqualTo("Has notes");
+
+            // when - send empty strings to clear (use Map to ensure "" is serialized, not omitted)
+            Map<String, Object> updateBody = Map.of("purchaseSource", "", "notes", "");
+
+            RecordResponse updated = client.toBlocking()
+                    .retrieve(HttpRequest.PUT("/api/records/" + created.id(), updateBody).bearerAuth(token), RecordResponse.class);
+
+            // then
+            assertThat(updated.purchaseSource()).isNull();
+            assertThat(updated.notes()).isNull();
+        }
+    }
+
+    @Nested
+    class PaginationValidationTests {
+
+        @Test
+        void should_return_400_for_negative_page() {
+            String token = loginAndGetToken("katrin", "katrin123");
+
+            Throwable throwable = catchThrowable(() ->
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/records?page=-1").bearerAuth(token)));
+
+            assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
+            HttpClientResponseException e = (HttpClientResponseException) throwable;
+            assertThat(e.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        }
+
+        @Test
+        void should_return_400_for_oversized_page() {
+            String token = loginAndGetToken("katrin", "katrin123");
+
+            Throwable throwable = catchThrowable(() ->
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/records?size=101").bearerAuth(token)));
+
+            assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
+            HttpClientResponseException e = (HttpClientResponseException) throwable;
+            assertThat(e.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        }
+
+        @Test
+        void should_return_400_for_zero_page_size() {
+            String token = loginAndGetToken("katrin", "katrin123");
+
+            Throwable throwable = catchThrowable(() ->
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/records?size=0").bearerAuth(token)));
+
+            assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
+            HttpClientResponseException e = (HttpClientResponseException) throwable;
+            assertThat(e.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        }
     }
 
     private Long createTestRecordAndGetId(String token) {

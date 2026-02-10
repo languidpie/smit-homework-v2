@@ -59,8 +59,14 @@ public class PartService {
         return partRepository.findByType(type);
     }
 
-    public List<Part> searchByName(String name) {
-        return partRepository.findByNameContainsIgnoreCase(name);
+    public List<Part> search(String query) {
+        return partRepository.searchByNameOrDescription(escapeLikePattern(query));
+    }
+
+    static String escapeLikePattern(String input) {
+        return input.replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
     }
 
     @Transactional

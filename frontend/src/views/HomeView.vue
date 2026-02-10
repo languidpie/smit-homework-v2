@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 </script>
 
 <template>
@@ -15,7 +18,7 @@ import { RouterLink } from 'vue-router'
 
     <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
       <!-- Bicycle Parts Card -->
-      <div class="card p-6">
+      <div v-if="authStore.canAccessParts" class="card p-6">
         <div class="text-center">
           <div class="text-6xl mb-4">🚲</div>
           <h2 class="text-2xl font-bold text-gray-900 mb-2">Bicycle Parts</h2>
@@ -29,7 +32,7 @@ import { RouterLink } from 'vue-router'
       </div>
 
       <!-- Vinyl Records Card -->
-      <div class="card p-6">
+      <div v-if="authStore.canAccessRecords" class="card p-6">
         <div class="text-center">
           <div class="text-6xl mb-4">🎵</div>
           <h2 class="text-2xl font-bold text-gray-900 mb-2">Vinyl Records</h2>

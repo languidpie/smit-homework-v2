@@ -270,6 +270,76 @@ class PartIntegrationTest {
             assertThat(content).hasSize(4);
             assertThat(pageResponse.get("totalElements")).isEqualTo(4);
         }
+
+        @Test
+        void should_clear_nullable_fields_via_empty_string() {
+            // given
+            String token = loginAndGetToken("mart", "mart123");
+            PartCreateRequest createRequest = new PartCreateRequest(
+                    "Test Part",
+                    "Has description",
+                    PartType.OTHER,
+                    "Garage",
+                    5,
+                    PartCondition.NEW,
+                    "Has notes"
+            );
+
+            PartResponse created = client.toBlocking()
+                    .retrieve(HttpRequest.POST("/api/parts", createRequest).bearerAuth(token), PartResponse.class);
+            assertThat(created.description()).isEqualTo("Has description");
+            assertThat(created.notes()).isEqualTo("Has notes");
+
+            // when - send empty strings to clear (use Map to ensure "" is serialized, not omitted)
+            Map<String, Object> updateBody = Map.of("description", "", "notes", "");
+
+            PartResponse updated = client.toBlocking()
+                    .retrieve(HttpRequest.PUT("/api/parts/" + created.id(), updateBody).bearerAuth(token), PartResponse.class);
+
+            // then
+            assertThat(updated.description()).isNull();
+            assertThat(updated.notes()).isNull();
+        }
+    }
+
+    @Nested
+    class PaginationValidationTests {
+
+        @Test
+        void should_return_400_for_negative_page() {
+            String token = loginAndGetToken("mart", "mart123");
+
+            Throwable throwable = catchThrowable(() ->
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/parts?page=-1").bearerAuth(token)));
+
+            assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
+            HttpClientResponseException e = (HttpClientResponseException) throwable;
+            assertThat(e.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        }
+
+        @Test
+        void should_return_400_for_oversized_page() {
+            String token = loginAndGetToken("mart", "mart123");
+
+            Throwable throwable = catchThrowable(() ->
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/parts?size=101").bearerAuth(token)));
+
+            assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
+            HttpClientResponseException e = (HttpClientResponseException) throwable;
+            assertThat(e.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        }
+
+        @Test
+        void should_return_400_for_zero_page_size() {
+            String token = loginAndGetToken("mart", "mart123");
+
+            Throwable throwable = catchThrowable(() ->
+                    client.toBlocking().retrieve(HttpRequest.GET("/api/parts?size=0").bearerAuth(token)));
+
+            assertThat(throwable).isInstanceOf(HttpClientResponseException.class);
+            HttpClientResponseException e = (HttpClientResponseException) throwable;
+            assertThat(e.getStatus().getCode()).isEqualTo(HttpStatus.BAD_REQUEST.getCode());
+        }
     }
 
     private Long createTestPartAndGetId(String token) {

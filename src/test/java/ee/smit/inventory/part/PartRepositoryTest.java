@@ -2,7 +2,7 @@ package ee.smit.inventory.part;
 
 /**
  * Repository tests for {@link PartRepository}.
- * Tests database operations for bicycle parts using H2 in-memory database.
+ * Tests database operations for bicycle parts using Testcontainers PostgreSQL.
  */
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -73,17 +73,23 @@ class PartRepositoryTest {
     }
 
     @Test
-    void should_find_by_name_contains_ignore_case() {
+    void should_search_by_name_or_description() {
         // given
         partRepository.save(createTestPart("Shimano Ultegra Brake", PartType.BRAKE));
         partRepository.save(createTestPart("SRAM Red Brake", PartType.BRAKE));
 
-        // when
-        List<Part> results = partRepository.findByNameContainsIgnoreCase("shimano");
+        // when - search by name
+        List<Part> nameResults = partRepository.searchByNameOrDescription("shimano");
 
         // then
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).contains("Shimano");
+        assertThat(nameResults).hasSize(1);
+        assertThat(nameResults.get(0).getName()).contains("Shimano");
+
+        // when - search by description
+        List<Part> descResults = partRepository.searchByNameOrDescription("description");
+
+        // then - all parts have "Test description"
+        assertThat(descResults).hasSize(2);
     }
 
     @Test

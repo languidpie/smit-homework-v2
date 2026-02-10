@@ -4,8 +4,6 @@ export interface Page<T> {
   pageSize: number
   totalElements: number
   totalPages: number
-  first: boolean
-  last: boolean
 }
 
 export type SortDirection = 'ASC' | 'DESC'

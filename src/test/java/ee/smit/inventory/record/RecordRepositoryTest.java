@@ -2,7 +2,7 @@ package ee.smit.inventory.record;
 
 /**
  * Repository tests for {@link RecordRepository}.
- * Tests database operations for vinyl records using H2 in-memory database.
+ * Tests database operations for vinyl records using Testcontainers PostgreSQL.
  */
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;

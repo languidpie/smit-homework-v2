@@ -9,9 +9,7 @@ micronaut:
         web:
           allowed-origins:
             - http://localhost:5173
-            - http://localhost:3000
             - http://localhost
-            - http://frontend
           allowed-methods:
             - GET
             - POST
@@ -76,6 +74,7 @@ endpoints:
   health:
     enabled: true
     sensitive: false
+    details-visible: NEVER
 
 jackson:
   serialization:

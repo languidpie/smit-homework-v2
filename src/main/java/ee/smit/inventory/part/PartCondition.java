@@ -7,19 +7,9 @@ import io.micronaut.serde.annotation.Serdeable;
  */
 @Serdeable
 public enum PartCondition {
-    NEW("New"),
-    EXCELLENT("Excellent"),
-    GOOD("Good"),
-    FAIR("Fair"),
-    POOR("Poor");
-
-    private final String displayName;
-
-    PartCondition(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
+    NEW,
+    EXCELLENT,
+    GOOD,
+    FAIR,
+    POOR
 }

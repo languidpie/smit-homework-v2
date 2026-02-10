@@ -66,7 +66,6 @@ export function validateRecord(data: {
   condition: string
 }): ValidationResult {
   const errors: Record<string, string> = {}
-  const currentYear = new Date().getFullYear()
 
   // Title: required, not blank
   if (!data.title || data.title.trim() === '') {
@@ -82,13 +81,13 @@ export function validateRecord(data: {
     errors.artist = 'Artist must be less than 255 characters'
   }
 
-  // Release year: required, between 1900 and current year
+  // Release year: required, between 1900 and 2100
   if (data.releaseYear === null || data.releaseYear === undefined) {
     errors.releaseYear = 'Release year is required'
   } else if (data.releaseYear < 1900) {
     errors.releaseYear = 'Release year must be 1900 or later'
-  } else if (data.releaseYear > currentYear) {
-    errors.releaseYear = `Release year cannot be in the future (max: ${currentYear})`
+  } else if (data.releaseYear > 2100) {
+    errors.releaseYear = 'Release year must be 2100 or earlier'
   } else if (!Number.isInteger(data.releaseYear)) {
     errors.releaseYear = 'Release year must be a whole number'
   }

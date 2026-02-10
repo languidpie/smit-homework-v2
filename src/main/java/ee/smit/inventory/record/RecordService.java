@@ -61,7 +61,13 @@ public class RecordService {
     }
 
     public List<VinylRecord> search(String query) {
-        return recordRepository.searchByTitleOrArtist(query);
+        return recordRepository.searchByTitleOrArtist(escapeLikePattern(query));
+    }
+
+    static String escapeLikePattern(String input) {
+        return input.replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
     }
 
     @Transactional

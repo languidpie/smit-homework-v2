@@ -1,5 +1,6 @@
 package ee.smit.inventory.part;
 
+import io.micronaut.data.annotation.Query;
 import io.micronaut.data.jdbc.annotation.JdbcRepository;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
@@ -21,9 +22,10 @@ public interface PartRepository extends CrudRepository<Part, Long> {
 
     List<Part> findByCondition(PartCondition condition);
 
-    List<Part> findByNameContainsIgnoreCase(String name);
-
     List<Part> findByLocationContainsIgnoreCase(String location);
+
+    @Query("SELECT * FROM parts WHERE LOWER(name) LIKE LOWER('%' || :query || '%') ESCAPE '\\' OR LOWER(description) LIKE LOWER('%' || :query || '%') ESCAPE '\\'")
+    List<Part> searchByNameOrDescription(String query);
 
     long countByType(PartType type);
 }

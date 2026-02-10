@@ -189,7 +189,7 @@ async function handleSubmit() {
               v-model.number="form.releaseYear"
               type="number"
               min="1900"
-              :max="currentYear"
+              max="2100"
               step="1"
               class="form-input"
               :class="{ 'border-red-500 focus:ring-red-500': fieldErrors.releaseYear }"
@@ -198,7 +198,7 @@ async function handleSubmit() {
             <p v-if="fieldErrors.releaseYear" class="mt-1 text-sm text-red-600">
               {{ fieldErrors.releaseYear }}
             </p>
-            <p v-else class="mt-1 text-sm text-gray-500">Between 1900 and {{ currentYear }}</p>
+            <p v-else class="mt-1 text-sm text-gray-500">Between 1900 and 2100</p>
           </div>
 
           <!-- Genre -->

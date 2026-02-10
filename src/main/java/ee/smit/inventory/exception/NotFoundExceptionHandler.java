@@ -12,7 +12,7 @@ import jakarta.inject.Singleton;
  */
 @Produces
 @Singleton
-public class GlobalExceptionHandler implements
+public class NotFoundExceptionHandler implements
         ExceptionHandler<NotFoundException, HttpResponse<ErrorResponse>> {
 
     @Override

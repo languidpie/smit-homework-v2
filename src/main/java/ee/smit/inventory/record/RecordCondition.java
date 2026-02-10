@@ -7,21 +7,11 @@ import io.micronaut.serde.annotation.Serdeable;
  */
 @Serdeable
 public enum RecordCondition {
-    MINT("Mint"),
-    NEAR_MINT("Near Mint"),
-    EXCELLENT("Excellent"),
-    VERY_GOOD("Very Good"),
-    GOOD("Good"),
-    FAIR("Fair"),
-    POOR("Poor");
-
-    private final String displayName;
-
-    RecordCondition(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
+    MINT,
+    NEAR_MINT,
+    EXCELLENT,
+    VERY_GOOD,
+    GOOD,
+    FAIR,
+    POOR
 }

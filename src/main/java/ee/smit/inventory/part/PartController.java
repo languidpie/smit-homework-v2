@@ -111,11 +111,11 @@ public class PartController {
     }
 
     @Get("/search")
-    @Operation(summary = "Search parts", description = "Search bicycle parts by name")
+    @Operation(summary = "Search parts", description = "Search bicycle parts by name or description")
     @ApiResponse(responseCode = "200", description = "List of matching parts")
-    public List<PartResponse> searchByName(
+    public List<PartResponse> search(
             @Parameter(description = "Search query") @QueryValue String q) {
-        return partService.searchByName(q).stream()
+        return partService.search(q).stream()
                 .map(PartResponse::fromEntity)
                 .toList();
     }
